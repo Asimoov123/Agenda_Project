@@ -64,13 +64,16 @@ void rendez_Vous(t_d_contact *);
 
 void display_rendez_vous(t_d_rdv);
 
-void display_all_rendez_vous(t_d_contact);
+void display_all_rendez_vous(t_d_ContactList, char *);
 
 void display_all_appointment(t_d_contact);
 
 
 void delete_all_RDV(t_d_contact *);
 
-void delete_Contact(t_d_ContactList *, t_d_contact *);
+void delete_Contact(t_d_ContactList *, char *);
+t_d_contact **isContactInList(t_d_ContactList, char *);
+void searchContact(t_d_ContactList mylist, char * searchContactName);
+//void delete_Contact(t_d_ContactList *, t_d_contact *);
 
 #endif //AGENDA_PROJECT_AGENDA_H

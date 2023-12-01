@@ -41,7 +41,7 @@ char *scanString(void) {
 
 char *Scan_name() {
     char *nom_complet;
-    printf("Veuillez saisir le nom et le prenom du nouveau contact :\n");
+    printf("Please enter the first and last name of the contact :\n");
     nom_complet = scanString();
     for (int i = 0; i < strlen(nom_complet); i++) {
         if (nom_complet[i] >= 'A' && nom_complet[i] <= 'Z') {
@@ -57,6 +57,8 @@ char *Scan_name() {
 }
 
 
+/* This function creates a new contact with a given name and level.
+It returns a pointer to the newly created contact. */
 t_d_contact *createContact(char *name, int lvl) {
     t_d_contact *contact = malloc(sizeof(t_d_contact));
     contact->nom = name;
@@ -71,6 +73,7 @@ t_d_contact *createContact(char *name, int lvl) {
     return contact;
 }
 
+// This function creates and returns a new contact list.
 t_d_ContactList createContactList() {
     t_d_ContactList mylist;
     mylist.max_level = 4;
@@ -82,13 +85,14 @@ t_d_ContactList createContactList() {
     return mylist;
 }
 
-
+// This function creates and inserts alphabetically a new contact with a given name.
 void insertContact(t_d_ContactList *mylist, char *newContactName) {
     t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
     int currentLvl = 3, previousLvl = 3;
 
+    // If the new contact is to be inserted at the beginning of the list
     if (currCell == NULL || strcmp(currCell->nom, newContactName) > 0) {
-        t_d_contact *newContact = createContact(newContactName, 3);
+        t_d_contact *newContact = createContact(newContactName, 3); // First element is always at max level
         for (int c = 0; c < 4; c++) {
             newContact->next[c] = currCell;
             mylist->heads[c] = newContact;
@@ -96,16 +100,24 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
         return;
     }
 
+    // Locate insertion point for new contact
     while (currentLvl >= 0) {
         while (currCell != NULL && strncmp(currCell->nom, newContactName, 4 - currentLvl) < 0) {
             prevCell = currCell;
             currCell = currCell->next[currentLvl];
             previousLvl = currentLvl;
         }
-        if (currCell == NULL || strncmp(currCell->nom, newContactName, 4 - currentLvl) > 0) break;
+        if (currCell == NULL || strncmp(currCell->nom, newContactName, 4 - currentLvl) > 0) {
+            break;
+        } else if (strcmp(currCell->nom, newContactName) == 0) {
+            printf("Contact already registered");
+            break;
+        }
         currentLvl--;
     }
-    if (currCell == NULL && strcmp(prevCell->nom, newContactName) < 0) { // Insert End
+
+    // Insert the new contact
+    if (currCell == NULL && strcmp(prevCell->nom, newContactName) < 0) { // Insert at the end
         t_d_contact *newContact = createContact(newContactName, currentLvl);
         t_d_contact *temp;
         for (int i = 0; i < currentLvl + 1; i++) {
@@ -116,9 +128,8 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
             temp->next[i] = newContact;
         }
     } else if (strcmp(currCell->nom, newContactName) > 0) { // Insert Before CurrentCell
-        t_d_contact *updateCurrCell = createContact(currCell->nom,
-                                                    currentLvl); // update current contact number of cells
-        t_d_contact *newContact = createContact(newContactName, previousLvl); // create new contact
+        t_d_contact *updateCurrCell = createContact(currCell->nom, currentLvl); // Update current contact
+        t_d_contact *newContact = createContact(newContactName, previousLvl); // Create new contact
 
         for (int i = 0; i <= currentLvl; i++) {
             updateCurrCell->next[i] = currCell->next[i];
@@ -136,6 +147,7 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
             temp->next[i] = newContact;
         }
     }
+    // Free memory
     free(currCell);
     currCell = NULL;
 }
@@ -152,20 +164,88 @@ void delete_all_RDV(t_d_contact *contact) {
     }
 }
 
-void delete_Contact(t_d_ContactList *mylist, t_d_contact *contact_del) {
-    t_d_contact *temp, *prec;
-    for (int i = 0; i < 4; i++) {
-        prec = NULL;
-        temp = mylist->heads[i];
-        while (strcmp(temp->nom, contact_del->nom) == 0) {
-            prec = temp;
-            temp = temp->next[i];
+void delete_Contact(t_d_ContactList *mylist, char *delContactName) {
+    t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
+    int currentLvl = 3, previousLvl = 3, found = 0;
+
+
+    if (strcmp(currCell->nom, delContactName) == 0) {
+        for (int i = 0; i < 4; i++) {
+            mylist->heads[i] = currCell->next[i];
         }
-        prec->next[i] = temp->next[i];
-        contact_del->next[i] = NULL;
+    } else {
+        // Locate contact to delete
+        while (currentLvl >= 0) {
+            while (currCell != NULL && strncmp(currCell->nom, delContactName, 4 - currentLvl) < 0) {
+                prevCell = currCell;
+                currCell = currCell->next[currentLvl];
+                previousLvl = currentLvl;
+            }
+            if (currCell == NULL || strcmp(currCell->nom, delContactName) > 0) {
+                printf("Contact not found.");
+                return;
+            } else if (strcmp(currCell->nom, delContactName) == 0) {
+                found = 1;
+                break;
+            }
+            currentLvl--;
+        }
+
+        t_d_contact *temp;
+        for (int i = 0; i <= previousLvl; i++) {
+            temp = prevCell;
+            while (temp->next[i] != currCell) {
+                temp = temp->next[i];
+            }
+            temp->next[i] = currCell->next[i];
+        }
     }
-    delete_all_RDV(contact_del);
-    free(contact_del);
+
+    delete_all_RDV(currCell);
+    free(currCell);
+    currCell = NULL;
+    printf("Contact successfully deleted.");
+}
+
+t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
+    // If list is empty
+    if (mylist.heads[3] == NULL){
+        return NULL;
+    }
+
+    t_d_contact *prevCell = NULL, *currCell = mylist.heads[3];
+    t_d_contact **res = malloc(2 * sizeof(t_d_contact *));
+    if (res == NULL) {
+        free(currCell);
+        currCell = NULL;
+        printf("ERROR: Failed to allocate memory.\n");
+        exit(1);
+    }
+    int currentLvl = 3;
+
+    // Locate contact in list
+    while (currentLvl >= 0) {
+        while (currCell != NULL && strncmp(currCell->nom, searchContactName, 4 - currentLvl) < 0) {
+            prevCell = currCell;
+            currCell = currCell->next[currentLvl];
+        }
+        if (currCell == NULL || strcmp(currCell->nom, searchContactName) > 0) {
+            free(res);
+            res = NULL;
+        } else if (strcmp(currCell->nom, searchContactName) == 0) {
+            res[0] = prevCell; res[1] = currCell;
+        }
+        currentLvl--;
+    }
+    return res;
+}
+
+
+void searchContact(t_d_ContactList mylist, char *searchContactName) {
+    if (isContactInList(mylist, searchContactName))
+        printf("Contact Found.");
+    else
+        printf("Contact Not Found.");
 }
 
 
@@ -243,14 +323,14 @@ void rendez_Vous(t_d_contact *nom) {
     t_d_rdv *prev;
     temp = nom->rdv_head;
 
-    printf("Quel est l'objet de votre rendez-vous ? : \n");
+    printf("What is your appointment about? : \n");
     char *texte = scanString();
     rdv->objet = texte;
-    printf("Veuillez saisir la date de votre rendez-vous sous la forme suivante jj/mm/aaaa \n");
+    printf("Please enter the date of your appointment in the following format dd/mm/yyyy : \n");
     char *dateStr = scanString();
     int *intDate = checkDate((dateStr));
     while (intDate[0] == 0) {
-        printf("Date invalide\nVeuillez saisir la date de votre rendez-vous sous la forme suivante jj/mm/aaaa \n");
+        printf("Invalid date\nPlease enter the date of your appointment in the following format dd/mm/yyyy : \n");
         dateStr = scanString();
         intDate = checkDate((dateStr));
     }
@@ -258,11 +338,11 @@ void rendez_Vous(t_d_contact *nom) {
     rdv->date.mois = intDate[2];
     rdv->date.annee = intDate[3];
 
-    printf("Veuillez rentrer l'heure du rendez-vous sous la forme suivante hh:mm \n");
+    printf("Please enter the appointment time in the following format hh:mm : \n");
     char *timeStr = scanString();
     int *intTime = checkTime((timeStr));
     while (intTime[0] == 0) {
-        printf("Horaire invalide\nVeuillez rentrer l'heure du rendez-vous sous la forme suivante hh:mm \n");
+        printf("/!\\Invalid time\nPlease enter the appointment time in the following format hh:mm : \n");
         timeStr = scanString();
         intTime = checkTime((timeStr));
     }
@@ -271,18 +351,18 @@ void rendez_Vous(t_d_contact *nom) {
     rdv->horaire.minute = intTime[2];
 
 
-    printf("Veuillez saisir combien de temps durera votre rendez-vous sous la forme hh:mm  \n");
+    printf("Please enter the appointment duration time in the following format hh:mm : \n");
     char *durationStr = scanString();
     int *intDuration = checkTime((durationStr));
     while (intDuration[0] == 0) {
-        printf("Temps invalide\nVeuillez saisir combien de temps durera votre rendez-vous sous la forme hh:mm  \n");
+        printf("/!\\Invalid time\nPlease enter the appointment duration time in the following format hh:mm : \n");
         durationStr = scanString();
         intDuration = checkTime((durationStr));
     }
     rdv->duree.heure = intDuration[1];
     rdv->duree.minute = intDuration[2];
 
-    // Je sais pas s'il sont tous utiles
+    // Je sais pas s'ils sont tous utiles
     free(dateStr);
     dateStr = NULL;
     free(intDate);
@@ -297,7 +377,7 @@ void rendez_Vous(t_d_contact *nom) {
     intDuration = NULL;
 
 
-    //Rajout dans la liste par ordre croissant
+    // Rajout dans la liste par ordre croissant
 
     if (temp == NULL) {
         nom->rdv_head = rdv;
@@ -361,21 +441,24 @@ void rendez_Vous(t_d_contact *nom) {
 }
 
 void display_rendez_vous(t_d_rdv rdv) {
-    printf("\t- Votre rendez-vous '%s' est prevu:\n", rdv.objet);
-    printf("\t\tLe %d/%d/%d;\n", rdv.date.jour, rdv.date.mois, rdv.date.annee);
-    if (rdv.horaire.minute < 10) {
-        printf("\t\tA %dh0%d;\n", rdv.horaire.heure, rdv.horaire.minute);
-    } else {
-        printf("\t\tA %dh%d;\n", rdv.horaire.heure, rdv.horaire.minute);
-    }
-    printf("\t\tD'une duree de %d heures et %d minutes.\n\n", rdv.duree.heure, rdv.duree.minute);
+    printf("\tObject : '%s'\n", rdv.objet);
+    printf("\t\tDate : %02d/%02d/%04d\n", rdv.date.jour, rdv.date.mois, rdv.date.annee);
+    printf("\t\tTime : %02d:%02d\n", rdv.horaire.heure, rdv.horaire.minute);
+    if (rdv.duree.heure == 0) printf("\t\tDuration : %02d minutes\n\n", rdv.duree.minute);
+    else printf("\t\tDuration : %02d hours and %02d minutes\n\n", rdv.duree.heure, rdv.duree.minute);
 }
 
 
-void display_all_rendez_vous(t_d_contact contact) {
+void display_all_rendez_vous(t_d_ContactList mylist, char * rdvContactName) {
+    t_d_contact *contact = isContactInList(mylist, rdvContactName)[1];
+    if (contact == NULL){
+        printf("Contact not found\n");
+        return;
+    }
+
     t_d_rdv *rdv_cur;
-    rdv_cur = contact.rdv_head;
-    printf("Voici les rendez-vous de %s :\n", contact.nom);
+    rdv_cur = contact->rdv_head;
+    printf("%s's appointments :\n", contact->nom);
     while (rdv_cur != NULL) {
         display_rendez_vous(*rdv_cur);
         rdv_cur = rdv_cur->next;

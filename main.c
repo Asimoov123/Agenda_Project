@@ -122,24 +122,18 @@ int main() {
     insertContact(&mylist, "guetta");
 
     while (run) {
-        printf("1. Create Contact\n2. Create RDV\n3. Display contact list\n4. SearchContact\n5. Afficher RDV\n6. Exit\n> ");
+        printf("1. Create Contact\n2. Delete Contact\n3. Display Contact List\n4. Search Contact\n5. Afficher RDV\n6. Exit\n> ");
         if (fgets(buff, 128, stdin) != NULL) {
             if (strcmp(buff, "1\n") == 0) {
                 insertContact(&mylist, Scan_name());
             } else if (strcmp(buff, "2\n") == 0) {
-                rendez_Vous(mylist.heads[0]);
+                delete_Contact(&mylist, Scan_name());
             } else if (strcmp(buff, "3\n") == 0) {
                 display_all_levels_Contact_aligned(mylist);
             } else if (strcmp(buff, "4\n") == 0) {
-                scanString1(mylist);
+                searchContact(mylist, Scan_name());
             } else if (strcmp(buff, "5\n") == 0) {
-                printf("%s :\n", mylist.heads[0]->nom);
-                printf("Objet : %s\n", mylist.heads[0]->rdv_head->objet);
-                printf("Date et Heure : %02d/%02d/%04d %02d:%02d\n", mylist.heads[0]->rdv_head->date.jour,
-                       mylist.heads[0]->rdv_head->date.mois, mylist.heads[0]->rdv_head->date.annee,
-                       mylist.heads[0]->rdv_head->horaire.heure, mylist.heads[0]->rdv_head->horaire.minute);
-                printf("Durée : %02d:%02d\n", mylist.heads[0]->rdv_head->duree.heure,
-                       mylist.heads[0]->rdv_head->duree.minute);
+                display_all_rendez_vous(mylist, Scan_name());
             } else if (strcmp(buff, "6\n") == 0) {
                 run = 0;
             } else if (strcmp(buff, "\n") != 0) {

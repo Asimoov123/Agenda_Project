@@ -5,16 +5,15 @@
 #include "agenda.h"
 
 
-
 char *scanString(void) {
     char *p = NULL;
     char character;
     int index = 0;
     int size = 1;
-    p = (char *)malloc(sizeof(char));
+    p = (char *) malloc(sizeof(char));
 
     while (1) {
-        character = getchar(); // Permet d'attendre la frappe d'un caractère au clavier
+        character = (char) getchar(); // Permet d'attendre la frappe d'un caractère au clavier
 
         if (character == '\n') { // Vérifie si le charactere est le dernier saisi par l'utilisateur
             p[index] = '\0';  // Termine la chaîne
@@ -22,7 +21,14 @@ char *scanString(void) {
         }
         if (index >= size - 1) { // Realloue de la memoire si necessaire
             size *= 2;
-            p = (char *)realloc(p, size * sizeof(char));
+            char *temp = (char *) realloc(p, size * sizeof(char));
+            if (temp == NULL) {
+                free(p);
+                p = NULL;
+                printf("ERROR: Failed to reallocate memory!\n");
+                exit(1);
+            }
+            p = temp;
         }
 
         p[index] = character;
@@ -33,31 +39,30 @@ char *scanString(void) {
 }
 
 
-char *Scan_name(){
+char *Scan_name() {
     char *nom_complet;
     printf("Veuillez saisir le nom et le prenom du nouveau contact :\n");
     nom_complet = scanString();
-    for(int i=0;i<strlen(nom_complet);i++){
-        if(nom_complet[i] >= 'A' && nom_complet[i] <= 'Z'){
-            nom_complet[i] = nom_complet[i] + 'a' - 'A';
-        }
-        else{
-            if(nom_complet[i] == ' '){
+    for (int i = 0; i < strlen(nom_complet); i++) {
+        if (nom_complet[i] >= 'A' && nom_complet[i] <= 'Z') {
+            nom_complet[i] = (char) (nom_complet[i] + 'a' - 'A');
+        } else {
+            if (nom_complet[i] == ' ') {
                 nom_complet[i] = '_';
                 i--;
-            };
+            }
         }
     }
     return nom_complet;
 }
 
 
-t_d_contact *createContact(char * name){
+t_d_contact *createContact(char *name, int lvl) {
     t_d_contact *contact = malloc(sizeof(t_d_contact));
     contact->nom = name;
 
-    contact->next = (t_d_contact **) malloc(sizeof(t_d_contact*) *4);
-    for (int i = 0 ; i < 4 ; i++){
+    contact->next = (t_d_contact **) malloc(sizeof(t_d_contact *) * (lvl + 1));
+    for (int i = 0; i < (lvl + 1); i++) {
         contact->next[i] = NULL;
     }
     contact->rdv_head = NULL;
@@ -66,171 +71,93 @@ t_d_contact *createContact(char * name){
     return contact;
 }
 
-t_d_ContactList createContactList(){
+t_d_ContactList createContactList() {
     t_d_ContactList mylist;
     mylist.max_level = 4;
-    mylist.heads = (t_d_contact **) malloc(sizeof(t_d_contact*) * mylist.max_level);
+    mylist.heads = (t_d_contact **) malloc(sizeof(t_d_contact *) * mylist.max_level);
 
-    for (int i = 0 ; i < 4 ; i++){
+    for (int i = 0; i < 4; i++) {
         mylist.heads[i] = NULL;
     }
     return mylist;
 }
 
 
-int Compare(char *val1,char *val2){
-    int nbr_lettre;
-    if(strlen(val1)<strlen(val2)){
-        nbr_lettre = strlen(val1);
-    }
-    else {
-        nbr_lettre = strlen(val2);
-    }
+void insertContact(t_d_ContactList *mylist, char *newContactName) {
+    t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
+    int currentLvl = 3, previousLvl = 3;
 
-    for(int i=0;i<nbr_lettre;i++){
-        if(val1[i] < val2[i]){ // val1 est avant val2 dans l'ordre alphabétique
-            return 1;
+    if (currCell == NULL || strcmp(currCell->nom, newContactName) > 0) {
+        t_d_contact *newContact = createContact(newContactName, 3);
+        for (int c = 0; c < 4; c++) {
+            newContact->next[c] = currCell;
+            mylist->heads[c] = newContact;
         }
-        if(val1[i] > val2[i]){ // val1 est après val2 dans l'ordre alphabétique
-            return 0;
-        }
-    }
-    if(strlen(val1)<strlen(val2)){
-        return 1;
-    }
-    return 0;
-}
-
-
-void insertContactInListLvl(t_d_ContactList *mylist, t_d_contact *contact,int lvl_pres){
-    t_d_contact *temp, *prec;
-    int place;
-    if(mylist->heads[lvl_pres] == NULL){ // If list NULL
-        mylist->heads[lvl_pres] = contact ;
-        return;
-    }
-    if(mylist->heads[lvl_pres]->next[lvl_pres] == NULL){ // If One element in List
-        place = Compare(mylist->heads[lvl_pres]->nom,contact->nom);
-        if(place){
-            mylist->heads[lvl_pres]->next[lvl_pres] = contact;
-            return;
-        }
-        contact->next[lvl_pres] = mylist->heads[lvl_pres];
-        mylist->heads[lvl_pres] = contact;
-        return;
-    }
-    prec = mylist->heads[lvl_pres];
-    temp = mylist->heads[lvl_pres]->next[lvl_pres];
-    if(Compare(prec->nom,contact->nom) == 0){
-        contact->next[lvl_pres] = mylist->heads[lvl_pres];
-        mylist->heads[lvl_pres] = contact;
-        return;
-    }
-    while(Compare(temp->nom,contact->nom) && temp->next[lvl_pres]!= NULL){
-        prec = temp;
-        temp = temp->next[lvl_pres];
-    }
-
-    if(temp->next[lvl_pres] == NULL){
-        if(Compare(temp->nom,contact->nom)){
-            temp->next[lvl_pres] = contact;
-            return;
-        }
-        contact->next[lvl_pres] = temp;
-        prec->next[lvl_pres] = contact;
         return;
     }
 
-    contact->next[lvl_pres] = temp;
-    prec->next[lvl_pres] = contact;
-}
-
-int Same_Word(char *val1,char *val2){
-    if (strlen(val1) != strlen(val2)){
-        return 0;
-    }
-    for(int i=0;i<strlen(val1);i++){
-        if(val1[i]!=val2[i]){
-            return 0;
+    while (currentLvl >= 0) {
+        while (currCell != NULL && strncmp(currCell->nom, newContactName, 4 - currentLvl) < 0) {
+            prevCell = currCell;
+            currCell = currCell->next[currentLvl];
+            previousLvl = currentLvl;
         }
+        if (currCell == NULL || strncmp(currCell->nom, newContactName, 4 - currentLvl) > 0) break;
+        currentLvl--;
     }
-    return 1;
-}
-
-
-void insertContact(t_d_ContactList *mylist, t_d_contact *contact){
-    t_d_contact *temp, *prec;
-    for(int i=0;i<4;i++) {
-        insertContactInListLvl(mylist, contact, i);
-        int lvl = 0;
-        prec = NULL;
-        temp = mylist->heads[0];
-        while (Same_Word(temp->nom, contact->nom) == 0) {
-            prec = temp;
-            temp = temp->next[0];
-        }
-        if (prec != NULL) {
-            if (prec->nom[0] == contact->nom[0]) { // Level 3
-                lvl++;
-                if (prec->nom[1] == contact->nom[1]) { // Level 2
-                    lvl++;
-                    if (prec->nom[2] == contact->nom[2]) { // Level 1
-                        lvl++;
-                    }
-                }
+    if (currCell == NULL && strcmp(prevCell->nom, newContactName) < 0) { // Insert End
+        t_d_contact *newContact = createContact(newContactName, currentLvl);
+        t_d_contact *temp;
+        for (int i = 0; i < currentLvl + 1; i++) {
+            temp = prevCell;
+            while (temp->next[i] != NULL) {
+                temp = temp->next[i];
             }
-            if (lvl + i >= 3) {/*
-                for(int j = 1; j<i+1; j++){
-                    t_d_contact *suiv = contact->next[j];
-                    if(suiv == NULL){
-                        return;
-                    }
-                    if(j==1){
-                        if(contact->nom[0] == suiv->nom[0] && contact->nom[1] == suiv->nom[1] && contact->nom[2] == suiv->nom[2]) {
-                            contact->next[j] = suiv->next[j];
-                            suiv->next[j] = NULL;
-                        }
-                    }
-                    if(j==2){
-                        if(contact->nom[0] == suiv->nom[0] && contact->nom[1] == suiv->nom[1]) {
-                            contact->next[j] = suiv->next[j];
-                            suiv->next[j] = NULL;
-                        }
-                    }
-                    else{
-                        if(j==3){
-                            if(contact->nom[0] == suiv->nom[0]){
-                                contact->next[j] = suiv->next[j];
-                                suiv->next[j] = NULL;
-                            }
-                        }
-                    }
-                }*/
-                return;
-            }
+            temp->next[i] = newContact;
         }
+    } else if (strcmp(currCell->nom, newContactName) > 0) { // Insert Before CurrentCell
+        t_d_contact *updateCurrCell = createContact(currCell->nom,
+                                                    currentLvl); // update current contact number of cells
+        t_d_contact *newContact = createContact(newContactName, previousLvl); // create new contact
 
+        for (int i = 0; i <= currentLvl; i++) {
+            updateCurrCell->next[i] = currCell->next[i];
+            newContact->next[i] = updateCurrCell;
+        }
+        for (int i = currentLvl + 1; i <= previousLvl; i++) {
+            newContact->next[i] = currCell->next[i];
+        }
+        t_d_contact *temp;
+        for (int i = 0; i <= previousLvl; i++) {
+            temp = prevCell;
+            while (temp->next[i] != currCell) {
+                temp = temp->next[i];
+            }
+            temp->next[i] = newContact;
+        }
     }
+    free(currCell);
+    currCell = NULL;
 }
 
 
-void delete_all_RDV(t_d_contact* contact){
+void delete_all_RDV(t_d_contact *contact) {
     t_d_rdv *prec, *temp;
     temp = contact->rdv_head;
     prec = NULL;
-    while (temp!=NULL){
+    while (temp != NULL) {
         prec = temp;
         temp = temp->next;
         free(prec);
     }
 }
 
-void delete_Contact(t_d_ContactList * mylist, t_d_contact* contact_del){
+void delete_Contact(t_d_ContactList *mylist, t_d_contact *contact_del) {
     t_d_contact *temp, *prec;
-    for(int i=0;i<4;i++) {
+    for (int i = 0; i < 4; i++) {
         prec = NULL;
         temp = mylist->heads[i];
-        while (Same_Word(temp->nom, contact_del->nom) == 0) {
+        while (strcmp(temp->nom, contact_del->nom) == 0) {
             prec = temp;
             temp = temp->next[i];
         }
@@ -242,9 +169,7 @@ void delete_Contact(t_d_ContactList * mylist, t_d_contact* contact_del){
 }
 
 
-
-
-int * checkDate(char *strInput) {
+int *checkDate(char *strInput) {
     const char *separator = "/";
     int *intDate = malloc(4 * sizeof(int));
     char *strToken = strtok(strInput, separator);
@@ -266,7 +191,8 @@ int * checkDate(char *strInput) {
 
     if (aaaa >= 1900 && aaaa <= 9999) {
         if (mm >= 1 && mm <= 12) {
-            if (((jj >= 1 && jj <= 31) && (mm == 1 || mm == 3 || mm == 5 || mm == 7 || mm==8 || mm == 10 || mm == 12)) || // Mois à 31 jours
+            if (((jj >= 1 && jj <= 31) &&
+                 (mm == 1 || mm == 3 || mm == 5 || mm == 7 || mm == 8 || mm == 10 || mm == 12)) || // Mois à 31 jours
                 ((jj >= 1 && jj <= 30) && (mm == 4 || mm == 6 || mm == 9 || mm == 11)) || // Mois à 30 jours
                 ((jj >= 1 && jj <= 28) && (mm == 2)) || // Mois de février
                 (jj == 29 && mm == 2 && (aaaa % 400 == 0 || (aaaa % 4 == 0 && aaaa % 100 != 0)))) { // Années Bisextile
@@ -310,16 +236,12 @@ int *checkTime(char *strInput) {
 }
 
 
-void rendez_Vous(t_d_contact *nom){
+void rendez_Vous(t_d_contact *nom) {
     t_d_rdv *rdv = malloc(sizeof(t_d_rdv));
     rdv->next = NULL;
     t_d_rdv *temp;
     t_d_rdv *prev;
     temp = nom->rdv_head;
-    prev = temp;
-    int stop_M; // condition d'arret si on à placer la date en fonction du mois
-    int stop_J; // condition d'arret si on à placer la date en fonction du jour
-    stop_M = stop_J = 0;
 
     printf("Quel est l'objet de votre rendez-vous ? : \n");
     char *texte = scanString();
@@ -361,9 +283,18 @@ void rendez_Vous(t_d_contact *nom){
     rdv->duree.minute = intDuration[2];
 
     // Je sais pas s'il sont tous utiles
-    free(dateStr); dateStr = NULL; free(intDate); intDate = NULL;
-    free(timeStr); timeStr = NULL; free(intTime); intTime = NULL;
-    free(durationStr); durationStr = NULL; free(intDuration); intDuration = NULL;
+    free(dateStr);
+    dateStr = NULL;
+    free(intDate);
+    intDate = NULL;
+    free(timeStr);
+    timeStr = NULL;
+    free(intTime);
+    intTime = NULL;
+    free(durationStr);
+    durationStr = NULL;
+    free(intDuration);
+    intDuration = NULL;
 
 
     //Rajout dans la liste par ordre croissant
@@ -373,7 +304,10 @@ void rendez_Vous(t_d_contact *nom){
         nom->rdv_tail = rdv;
         return;
     }
-    if(rdv->date.annee < temp->date.annee ||  temp->date.annee == rdv->date.annee && rdv->date.annee < temp->date.annee || temp->date.annee == rdv->date.annee && rdv->date.annee == temp->date.annee && rdv->date.jour < temp->date.jour){
+    if (rdv->date.annee < temp->date.annee ||
+        temp->date.annee == rdv->date.annee && rdv->date.annee < temp->date.annee ||
+        temp->date.annee == rdv->date.annee && rdv->date.annee == temp->date.annee &&
+        rdv->date.jour < temp->date.jour) {
         rdv->next = temp;
         nom->rdv_head = rdv;
         return;
@@ -383,23 +317,22 @@ void rendez_Vous(t_d_contact *nom){
     while (temp != NULL) {
 
         // Equal date
-        if ((temp->date.annee == rdv->date.annee) && (temp->date.mois == rdv->date.mois) && (temp->date.jour == rdv->date.jour)){
-            if(rdv->horaire.heure < temp->horaire.heure){
+        if ((temp->date.annee == rdv->date.annee) && (temp->date.mois == rdv->date.mois) &&
+            (temp->date.jour == rdv->date.jour)) {
+            if (rdv->horaire.heure < temp->horaire.heure) {
                 temp = rdv;
                 temp->next = nom->rdv_head;
                 nom->rdv_head = temp;
                 temp = NULL;
                 break;
-            }
-            else{
-                if(rdv->horaire.heure == temp->horaire.heure && rdv->horaire.minute < temp->horaire.minute){
+            } else {
+                if (rdv->horaire.heure == temp->horaire.heure && rdv->horaire.minute < temp->horaire.minute) {
                     temp = rdv;
                     temp->next = nom->rdv_head;
                     nom->rdv_head = temp;
                     temp = NULL;
                     break;
-                }
-                else{
+                } else {
                     rdv->next = temp->next;
                     temp->next = rdv;
                     break;
@@ -427,62 +360,58 @@ void rendez_Vous(t_d_contact *nom){
     rdv->next = temp;
 }
 
-void display_rendez_vous(t_d_rdv rdv){
-    printf("\t- Votre rendez-vous '%s' est prevu:\n",rdv.objet);
-    printf("\t\tLe %d/%d/%d;\n",rdv.date.jour,rdv.date.mois,rdv.date.annee);
-    if(rdv.horaire.minute <10){
-        printf("\t\tA %dh0%d;\n",rdv.horaire.heure,rdv.horaire.minute);
+void display_rendez_vous(t_d_rdv rdv) {
+    printf("\t- Votre rendez-vous '%s' est prevu:\n", rdv.objet);
+    printf("\t\tLe %d/%d/%d;\n", rdv.date.jour, rdv.date.mois, rdv.date.annee);
+    if (rdv.horaire.minute < 10) {
+        printf("\t\tA %dh0%d;\n", rdv.horaire.heure, rdv.horaire.minute);
+    } else {
+        printf("\t\tA %dh%d;\n", rdv.horaire.heure, rdv.horaire.minute);
     }
-    else{
-        printf("\t\tA %dh%d;\n",rdv.horaire.heure,rdv.horaire.minute);
-    }
-    printf("\t\tD'une duree de %d heures et %d minutes.\n\n",rdv.duree.heure,rdv.duree.minute);
+    printf("\t\tD'une duree de %d heures et %d minutes.\n\n", rdv.duree.heure, rdv.duree.minute);
 }
 
 
-
-void display_all_rendez_vous(t_d_contact contact){
-    t_d_rdv* rdv_cur;
+void display_all_rendez_vous(t_d_contact contact) {
+    t_d_rdv *rdv_cur;
     rdv_cur = contact.rdv_head;
-    printf("Voici les rendez-vous de %s :\n",contact.nom);
-    while(rdv_cur!=NULL){
+    printf("Voici les rendez-vous de %s :\n", contact.nom);
+    while (rdv_cur != NULL) {
         display_rendez_vous(*rdv_cur);
         rdv_cur = rdv_cur->next;
     }
 }
 
-void display_all_appointment(t_d_contact contact){
+void display_all_appointment(t_d_contact contact) {
     t_d_rdv *cur;
     cur = contact.rdv_head;
-    while(cur!=NULL){
+    while (cur != NULL) {
         display_rendez_vous(*cur);
-        cur=cur->next;
+        cur = cur->next;
     }
 }
 
 
-int charPlaces (char *name) {
-    int r = 0;
-    r =strlen(name);
-    return r -1;
+int charPlaces(char *name) {
+    return (int) strlen(name) - 1;
 }
 
 
-void display_level_Contact_aligned(t_d_ContactList mylist, int lvl){
-
+void display_level_Contact_aligned(t_d_ContactList mylist, int lvl) {
     printf("[list head_%d @-]--", lvl);
-
     t_d_contact *current0Cell = mylist.heads[0]; // temporary cell
     t_d_contact *currentLvlCell = mylist.heads[lvl]; // temporary cell
 
     while (current0Cell != NULL) {
-        if (current0Cell != currentLvlCell){ // If the cell on the first line is different from the one on the line we want to display
-            while (current0Cell != currentLvlCell){ // while it is true, display '-' instead of cell
-                printf("---%.*s------", charPlaces(current0Cell->nom), "-----------------------------"); // https://stackoverflow.com/questions/14678948/how-to-repeat-a-char-using-printf
+        if (current0Cell !=
+            currentLvlCell) { // If the cell on the first line is different from the one on the line we want to display
+            while (current0Cell != currentLvlCell) { // while it is true, display '-' instead of cell
+                printf("---%.*s------", charPlaces(current0Cell->nom),
+                       "-----------------------------"); // https://stackoverflow.com/questions/14678948/how-to-repeat-a-char-using-printf
                 current0Cell = current0Cell->next[0]; // temporary cell is set to its successor (on the first line)
             }
         }
-        if (currentLvlCell->next == NULL || currentLvlCell == NULL) break;
+        if (currentLvlCell == NULL) break;
         printf(">[%s|@-]--", currentLvlCell->nom); // display the cell
         current0Cell = current0Cell->next[0]; // the cell on the first line is set to its successor
         currentLvlCell = currentLvlCell->next[lvl]; // the cell on level we want to display is set to its successor
@@ -491,8 +420,8 @@ void display_level_Contact_aligned(t_d_ContactList mylist, int lvl){
 }
 
 
-void display_all_levels_Contact_aligned(t_d_ContactList mylist){
-    for (int i = 0 ; i < 4 ; i++){
+void display_all_levels_Contact_aligned(t_d_ContactList mylist) {
+    for (int i = 0; i < 4; i++) {
         display_level_Contact_aligned(mylist, i);
     }
 }

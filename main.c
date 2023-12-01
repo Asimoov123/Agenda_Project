@@ -53,62 +53,96 @@ void compareExecutionTime(int nbOfSearches){
 }
 */
 
+void autocompletion(char *str, t_d_ContactList mylist) {
+    t_d_contact *current = mylist.heads[0];
+    int found = 0;
+    if (strlen(str) >= 3) {
+        while (current != NULL) {
+            if (strncmp(str, current->nom, strlen(str)) == 0) {
+                if (found == 0) {
+                    printf("Contacts found : ");
+                    found = 1;
+                }
 
-int main1() {
+                printf("%s, ", current->nom);
+            }
+            current = current->next[0];
 
-    t_d_contact *test1, *test2, *test3, *test4, *test5, *test6, *test7;
-    test1 = createContact(Scan_name());
-    test2 = createContact(Scan_name());
-    test3 = createContact(Scan_name());
-    test4 = createContact(Scan_name()); // Création d'une liste à niveau de 7 contact
-    test5 = createContact(Scan_name());
-    test6 = createContact(Scan_name());
-    test7 = createContact(Scan_name());
-    t_d_ContactList  mylist = createContactList();
 
-    insertContact(&mylist,test1);
-    insertContact(&mylist,test2);
-    insertContact(&mylist,test3);
-    insertContact(&mylist,test4);
-    insertContact(&mylist,test5); // Insertion dans la liste
-    insertContact(&mylist,test6);
-    insertContact(&mylist,test7);
-    display_all_levels_Contact_aligned(mylist); // Premier affichage
+        }
+    }
+}
 
-    delete_Contact(&mylist,test3); // Supression d'un élément (ici le 3ème)
+char *scanString1(t_d_ContactList mylist) {
+    char *p = NULL;
+    char character;
+    int index = 0;
+    int size = 1;
+    p = (char *) malloc(sizeof(char));
 
-    display_all_levels_Contact_aligned(mylist); // Deuxième affichage
+    while (1) {
+        character = (char) getchar(); // Permet d'attendre la frappe d'un caractère au clavier
 
-    return 0;
+        if (character == '\n') { // Vérifie si le charactere est le dernier saisi par l'utilisateur
+            p[index] = '\0';  // Termine la chaîne
+            break;
+        }
+        if (character == '\t') {
+            p[index] = '\0';
+            autocompletion(p, mylist);
+
+        }
+        if (index >= size - 1) { // Realloue de la memoire si necessaire
+            size *= 2;
+            char *temp = (char *) realloc(p, size * sizeof(char));
+            if (temp == NULL) {
+                free(p);
+                p = NULL;
+                printf("ERROR: Failed to reallocate memory!\n");
+                exit(1);
+            }
+            p = temp;
+        }
+
+        p[index] = character;
+        index++;
+    }
+
+    return p;
 }
 
 int main() {
-    t_d_contact *testContact;
     t_d_ContactList mylist = createContactList();
-    char* buff = malloc(sizeof(char)*128);
+    char *buff = malloc(sizeof(char) * 128);
     int run = 1;
-    char* txt = NULL;
 
-    while(run){
-        printf("1. Create Contact\n2. Delete Contact\n3. Display contact list\n4. SearchContact\n5. Afficher RDV\n6. Exit\n>");
-        if (fgets(buff, 128, stdin)!=NULL){
+    insertContact(&mylist, "flamel");
+    insertContact(&mylist, "gallouin");
+    insertContact(&mylist, "gartner");
+    insertContact(&mylist, "guetta");
+
+    while (run) {
+        printf("1. Create Contact\n2. Create RDV\n3. Display contact list\n4. SearchContact\n5. Afficher RDV\n6. Exit\n> ");
+        if (fgets(buff, 128, stdin) != NULL) {
             if (strcmp(buff, "1\n") == 0) {
-                testContact = createContact(Scan_name());
-                insertContact(&mylist, testContact);
-            } else if (strcmp(buff, "2\n") == 0){
-                delete_Contact(&mylist,testContact); // Supression d'un élément (ici le 3ème)
+                insertContact(&mylist, Scan_name());
+            } else if (strcmp(buff, "2\n") == 0) {
+                rendez_Vous(mylist.heads[0]);
             } else if (strcmp(buff, "3\n") == 0) {
-                display_all_levels_Contact_aligned(mylist); // Premier affichage
+                display_all_levels_Contact_aligned(mylist);
             } else if (strcmp(buff, "4\n") == 0) {
-                printf("blbblb");
-            } else if (strcmp(buff, "5\n") == 0){
+                scanString1(mylist);
+            } else if (strcmp(buff, "5\n") == 0) {
                 printf("%s :\n", mylist.heads[0]->nom);
-                printf("Objet : %s\n",  mylist.heads[0]->rdv_head->objet);
-                printf("Date et Heure : %02d/%02d/%04d %02d:%02d\n",  mylist.heads[0]->rdv_head->date.jour, mylist.heads[0]->rdv_head->date.mois, mylist.heads[0]->rdv_head->date.annee, mylist.heads[0]->rdv_head->horaire.heure, mylist.heads[0]->rdv_head->horaire.minute);
-                printf("Durée : %02d:%02d\n", mylist.heads[0]->rdv_head->duree.heure, mylist.heads[0]->rdv_head->duree.minute);
-            } else if (strcmp(buff, "6\n") == 0){
+                printf("Objet : %s\n", mylist.heads[0]->rdv_head->objet);
+                printf("Date et Heure : %02d/%02d/%04d %02d:%02d\n", mylist.heads[0]->rdv_head->date.jour,
+                       mylist.heads[0]->rdv_head->date.mois, mylist.heads[0]->rdv_head->date.annee,
+                       mylist.heads[0]->rdv_head->horaire.heure, mylist.heads[0]->rdv_head->horaire.minute);
+                printf("Durée : %02d:%02d\n", mylist.heads[0]->rdv_head->duree.heure,
+                       mylist.heads[0]->rdv_head->duree.minute);
+            } else if (strcmp(buff, "6\n") == 0) {
                 run = 0;
-            } else if (strcmp(buff, "\n") != 0){
+            } else if (strcmp(buff, "\n") != 0) {
                 printf("Unknown Function\n");
             }
         } else {

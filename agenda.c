@@ -25,7 +25,7 @@ char *scanString(void) {
             if (temp == NULL) {
                 free(p);
                 p = NULL;
-                printf("ERROR: Failed to reallocate memory!\n");
+                printf("Error: Failed to reallocate memory! : %s\n", strerror(errno));
                 exit(1);
             }
             p = temp;
@@ -38,24 +38,27 @@ char *scanString(void) {
     return p;
 }
 
+char *Scan_name(char *strInput) {
+    char *full_name = malloc(sizeof(strInput));
+    strcpy(full_name, strInput);
 
-char *Scan_name() {
-    char *nom_complet;
-    printf("Please enter the first and last name of the contact :\n");
-    nom_complet = scanString();
-    for (int i = 0; i < strlen(nom_complet); i++) {
-        if (nom_complet[i] >= 'A' && nom_complet[i] <= 'Z') {
-            nom_complet[i] = (char) (nom_complet[i] + 'a' - 'A');
+    for (int i = 0; i < strlen(full_name); i++) {
+        if ('A' <= full_name[i] && full_name[i] <= 'Z') {
+            full_name[i] = (char) (full_name[i] + 'a' - 'A');
         } else {
-            if (nom_complet[i] == ' ') {
-                nom_complet[i] = '_';
+            if (full_name[i] == ' ') {
+                full_name[i] = '_';
+                i--;
+            } else if (full_name[i] < 'a' || 'z' < full_name[i]) {
+                for (int j = i; j < strlen(full_name); j++) {
+                    full_name[j] = full_name[j + 1];
+                }
                 i--;
             }
         }
     }
-    return nom_complet;
+    return full_name;
 }
-
 
 /* This function creates a new contact with a given name and level.
 It returns a pointer to the newly created contact. */
@@ -73,6 +76,7 @@ t_d_contact *createContact(char *name, int lvl) {
     return contact;
 }
 
+
 // This function creates and returns a new contact list.
 t_d_ContactList createContactList() {
     t_d_ContactList mylist;
@@ -84,6 +88,7 @@ t_d_ContactList createContactList() {
     }
     return mylist;
 }
+
 
 // This function creates and inserts alphabetically a new contact with a given name.
 void insertContact(t_d_ContactList *mylist, char *newContactName) {
@@ -100,9 +105,12 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
         return;
     }
 
+    int cmp;
     // Locate insertion point for new contact
     while (currentLvl >= 0) {
-        while (currCell != NULL && strncmp(currCell->nom, newContactName, 4 - currentLvl) < 0) {
+        while (currCell != NULL &&
+               ((currentLvl == 0) ? strcmp(currCell->nom, newContactName) :
+                strncmp(currCell->nom, newContactName, 4 - currentLvl)) < 0) {
             prevCell = currCell;
             currCell = currCell->next[currentLvl];
             previousLvl = currentLvl;
@@ -110,8 +118,9 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
         if (currCell == NULL || strncmp(currCell->nom, newContactName, 4 - currentLvl) > 0) {
             break;
         } else if (strcmp(currCell->nom, newContactName) == 0) {
-            printf("Contact already registered");
-            break;
+            printf("Contact already registered.\n");
+            free(prevCell);
+            return;
         }
         currentLvl--;
     }
@@ -128,12 +137,10 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
             temp->next[i] = newContact;
         }
     } else if (strcmp(currCell->nom, newContactName) > 0) { // Insert Before CurrentCell
-        t_d_contact *updateCurrCell = createContact(currCell->nom, currentLvl); // Update current contact
         t_d_contact *newContact = createContact(newContactName, previousLvl); // Create new contact
 
         for (int i = 0; i <= currentLvl; i++) {
-            updateCurrCell->next[i] = currCell->next[i];
-            newContact->next[i] = updateCurrCell;
+            newContact->next[i] = currCell;
         }
         for (int i = currentLvl + 1; i <= previousLvl; i++) {
             newContact->next[i] = currCell->next[i];
@@ -146,10 +153,12 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
             }
             temp->next[i] = newContact;
         }
+        return;
     }
     // Free memory
     free(currCell);
     currCell = NULL;
+
 }
 
 
@@ -164,52 +173,54 @@ void delete_all_RDV(t_d_contact *contact) {
     }
 }
 
-void delete_Contact(t_d_ContactList *mylist, char *delContactName) {
-    t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
-    int currentLvl = 3, previousLvl = 3, found = 0;
 
 
-    if (strcmp(currCell->nom, delContactName) == 0) {
-        for (int i = 0; i < 4; i++) {
-            mylist->heads[i] = currCell->next[i];
-        }
-    } else {
-        // Locate contact to delete
-        while (currentLvl >= 0) {
-            while (currCell != NULL && strncmp(currCell->nom, delContactName, 4 - currentLvl) < 0) {
-                prevCell = currCell;
-                currCell = currCell->next[currentLvl];
-                previousLvl = currentLvl;
-            }
-            if (currCell == NULL || strcmp(currCell->nom, delContactName) > 0) {
-                printf("Contact not found.");
-                return;
-            } else if (strcmp(currCell->nom, delContactName) == 0) {
-                found = 1;
-                break;
-            }
-            currentLvl--;
-        }
-
-        t_d_contact *temp;
-        for (int i = 0; i <= previousLvl; i++) {
-            temp = prevCell;
-            while (temp->next[i] != currCell) {
-                temp = temp->next[i];
-            }
-            temp->next[i] = currCell->next[i];
-        }
-    }
-
-    delete_all_RDV(currCell);
-    free(currCell);
-    currCell = NULL;
-    printf("Contact successfully deleted.");
-}
+//void delete_Contact(t_d_ContactList *mylist, char *delContactName) {
+//    t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
+//    int currentLvl = 3, previousLvl = 3, found = 0;
+//
+//
+//    if (strcmp(currCell->nom, delContactName) == 0) {
+//        for (int i = 0; i < 4; i++) {
+//            mylist->heads[i] = currCell->next[i];
+//        }
+//    } else {
+//        // Locate contact to delete
+//        while (currentLvl >= 0) {
+//            while (currCell != NULL && strncmp(currCell->nom, delContactName, 4 - currentLvl) < 0) {
+//                prevCell = currCell;
+//                currCell = currCell->next[currentLvl];
+//                previousLvl = currentLvl;
+//            }
+//            if (currCell == NULL || strcmp(currCell->nom, delContactName) > 0) {
+//                printf("Contact not found.");
+//                return;
+//            } else if (strcmp(currCell->nom, delContactName) == 0) {
+//                found = 1;
+//                break;
+//            }
+//            currentLvl--;
+//        }
+//
+//        t_d_contact *temp;
+//        for (int i = 0; i <= previousLvl; i++) {
+//            temp = prevCell;
+//            while (temp->next[i] != currCell) {
+//                temp = temp->next[i];
+//            }
+//            temp->next[i] = currCell->next[i];
+//        }
+//    }
+//
+//    delete_all_RDV(currCell);
+//    free(currCell);
+//    currCell = NULL;
+//    printf("Contact successfully deleted.");
+//}
 
 t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
     // If list is empty
-    if (mylist.heads[3] == NULL){
+    if (mylist.heads[3] == NULL) {
         return NULL;
     }
 
@@ -233,7 +244,8 @@ t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
             free(res);
             res = NULL;
         } else if (strcmp(currCell->nom, searchContactName) == 0) {
-            res[0] = prevCell; res[1] = currCell;
+            res[0] = prevCell;
+            res[1] = currCell;
         }
         currentLvl--;
     }
@@ -242,6 +254,10 @@ t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
 
 
 void searchContact(t_d_ContactList mylist, char *searchContactName) {
+    if (strlen(searchContactName) < 3){
+        printf("Too short input.");
+        return;
+    }
     if (isContactInList(mylist, searchContactName))
         printf("Contact Found.");
     else
@@ -449,9 +465,9 @@ void display_rendez_vous(t_d_rdv rdv) {
 }
 
 
-void display_all_rendez_vous(t_d_ContactList mylist, char * rdvContactName) {
+void display_all_rendez_vous(t_d_ContactList mylist, char *rdvContactName) {
     t_d_contact *contact = isContactInList(mylist, rdvContactName)[1];
-    if (contact == NULL){
+    if (contact == NULL) {
         printf("Contact not found\n");
         return;
     }
@@ -492,9 +508,10 @@ void display_level_Contact_aligned(t_d_ContactList mylist, int lvl) {
                 printf("---%.*s------", charPlaces(current0Cell->nom),
                        "-----------------------------"); // https://stackoverflow.com/questions/14678948/how-to-repeat-a-char-using-printf
                 current0Cell = current0Cell->next[0]; // temporary cell is set to its successor (on the first line)
+                if (current0Cell == NULL) break;
             }
         }
-        if (currentLvlCell == NULL) break;
+        if (currentLvlCell == NULL || current0Cell == NULL) break;
         printf(">[%s|@-]--", currentLvlCell->nom); // display the cell
         current0Cell = current0Cell->next[0]; // the cell on the first line is set to its successor
         currentLvlCell = currentLvlCell->next[lvl]; // the cell on level we want to display is set to its successor

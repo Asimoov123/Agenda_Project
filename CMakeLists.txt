@@ -8,4 +8,5 @@ add_executable(Agenda_Project
         timer.c timer.h
         list.c list.h
         cell.c cell.h
-        agenda.c agenda.h)
+        agenda.c agenda.h
+        CSV_Files)

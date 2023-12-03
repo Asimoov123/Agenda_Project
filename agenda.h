@@ -41,7 +41,8 @@ typedef struct s_d_ContactList { //Liste des contacts
 
 char *scanString(void);
 
-char *Scan_name();
+char *Scan_name(char*);
+
 
 t_d_contact *createContact(char *, int);
 

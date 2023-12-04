@@ -8,7 +8,6 @@
 #include "agenda.h"
 
 
-
 /*
 
 void compareExecutionTime(int nbOfSearches){
@@ -137,28 +136,68 @@ int main() {
     int run = 1;
 
 
-    insertFromFile(mylist, "CSV_Files/1000names_1.csv");
-    insertFromFile(mylist, "CSV_Files/1000names_2.csv");
-    insertFromFile(mylist, "CSV_Files/1000names_3.csv");
-    insertFromFile(mylist, "CSV_Files/1000names_4.csv");
-    insertFromFile(mylist, "CSV_Files/1000names_5.csv");
+//    insertFromFile(mylist, "CSV_Files/1000names_1.csv");
+//    insertFromFile(mylist, "CSV_Files/1000names_2.csv");
+//    insertFromFile(mylist, "CSV_Files/1000names_3.csv");
+//    insertFromFile(mylist, "CSV_Files/1000names_4.csv");
+//    insertFromFile(mylist, "CSV_Files/1000names_5.csv");
+
+    insertContact(&mylist, Scan_name("PREVOT Romain"));
+    insertContact(&mylist, Scan_name("DosSantos Thomas"));
+    insertContact(&mylist, Scan_name("braquemart theo"));
 
 
     while (run) {
-        printf("1. Create Contact\n2. Display Contact List\n3. Search Contact\n4. Afficher RDV\n5. Exit\n> ");
+        printf("1. Search Contact\n2. Display Appointments\n3. Create Contact\n4. Create Appointment\n5. Delete Appointment\n6. Save Appointments To File\n7. Load Appointments\n8. Exit\n> ");
         if (fgets(buff, 128, stdin) != NULL) {
             if (strcmp(buff, "1\n") == 0) {
-                printf("Please enter the first and last name of the contact to insert:\n");
-                insertContact(&mylist, Scan_name(scanString()));
-            } else if (strcmp(buff, "2\n") == 0) {
-                display_all_levels_Contact_aligned(mylist);
-            } else if (strcmp(buff, "3\n") == 0) {
                 printf("Please enter the first and last name of the contact to search:\n");
                 searchContact(mylist, Scan_name(scanString()));
-            } else if (strcmp(buff, "4\n") == 0) {
+            } else if (strcmp(buff, "2\n") == 0) {
                 printf("Please enter the first and last name of the contact to display appointments:\n");
                 display_all_rendez_vous(mylist, Scan_name(scanString()));
+            } else if (strcmp(buff, "3\n") == 0) {
+                printf("Please enter the first and last name of the contact to insert:\n");
+                insertContact(&mylist, Scan_name(scanString()));
+            } else if (strcmp(buff, "4\n") == 0) {
+                printf("Please enter the first and last name of the contact:\n");
+                char *contact_name = Scan_name(scanString());
+                t_d_contact **temp = isContactInList(mylist, contact_name);
+                if (temp == NULL) {
+                    printf("Contact not found. Do you want to create a new contact ? (y/n)\n");
+                    if (fgets(buff, 128, stdin) != NULL) {
+                        if (strcmp(buff, "y\n") == 0) {
+                            insertContact(&mylist, contact_name);
+                            rendez_Vous(isContactInList(mylist, contact_name)[1]);
+                        } else {
+                            printf("Back to the menu.\n");
+                        }
+                    }
+                } else {
+                    rendez_Vous(temp[1]);
+                }
             } else if (strcmp(buff, "5\n") == 0) {
+                printf("Please enter the first and last name of the contact to insert:\n");
+                char *contact_name = Scan_name(scanString());
+                t_d_contact *temp = isContactInList(mylist, contact_name)[1];
+                printf("1. Delete an Appointment\n2. Delete All Appointments\n> ");
+                if (fgets(buff, 128, stdin) != NULL) {
+                    if (strcmp(buff, "1\n") == 0) {
+                        printf("Soon...\n");
+                    }
+                    if (strcmp(buff, "2\n") == 0) {
+                        if (temp != NULL) {
+                            delete_all_RDV(temp);
+                        } else {
+                            printf("Contact not found.\n");
+                        }
+                    }
+                }
+            } else if (strcmp(buff, "6\n") == 0) {
+                printf("Soon...\n");
+            } else if (strcmp(buff, "7\n") == 0) {
+                printf("Soon...\n");
+            } else if (strcmp(buff, "8\n") == 0) {
                 run = 0;
             } else if (strcmp(buff, "\n") != 0) {
                 printf("Unknown Function\n");

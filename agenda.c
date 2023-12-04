@@ -29,11 +29,9 @@ char *scanString(void) {
             }
             p = temp;
         }
-
         p[index] = character;
         index++;
     }
-
     return p;
 }
 
@@ -170,14 +168,11 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
 
 
 void delete_all_RDV(t_d_contact *contact) {
-    t_d_rdv *prec, *temp;
-    temp = contact->rdv_head;
-    prec = NULL;
-    while (temp != NULL) {
-        prec = temp;
-        temp = temp->next;
-        free(prec);
-        prec = NULL;
+    t_d_rdv *temp;
+    while (contact->rdv_head != NULL) {
+        temp = contact->rdv_head;
+        contact->rdv_head = contact->rdv_head->next;
+        free(temp);
     }
 }
 
@@ -339,12 +334,12 @@ int *checkTime(char *strInput) {
 }
 
 
-void rendez_Vous(t_d_contact *nom) {
+void rendez_Vous(t_d_contact *contact) {
     t_d_rdv *rdv = malloc(sizeof(t_d_rdv));
     rdv->next = NULL;
     t_d_rdv *temp;
     t_d_rdv *prev;
-    temp = nom->rdv_head;
+    temp = contact->rdv_head;
 
     printf("What is your appointment about? : \n");
     char *texte = scanString();
@@ -385,7 +380,7 @@ void rendez_Vous(t_d_contact *nom) {
     rdv->duree.heure = intDuration[1];
     rdv->duree.minute = intDuration[2];
 
-    // Je sais pas s'ils sont tous utiles
+    // Je ne sais pas s'ils sont tous utiles
     free(dateStr);
     dateStr = NULL;
     free(intDate);
@@ -403,8 +398,8 @@ void rendez_Vous(t_d_contact *nom) {
     // Rajout dans la liste par ordre croissant
 
     if (temp == NULL) {
-        nom->rdv_head = rdv;
-        nom->rdv_tail = rdv;
+        contact->rdv_head = rdv;
+        contact->rdv_tail = rdv;
         return;
     }
     if (rdv->date.annee < temp->date.annee ||
@@ -412,7 +407,7 @@ void rendez_Vous(t_d_contact *nom) {
         temp->date.annee == rdv->date.annee && rdv->date.annee == temp->date.annee &&
         rdv->date.jour < temp->date.jour) {
         rdv->next = temp;
-        nom->rdv_head = rdv;
+        contact->rdv_head = rdv;
         return;
     }
     prev = temp;
@@ -424,15 +419,15 @@ void rendez_Vous(t_d_contact *nom) {
             (temp->date.jour == rdv->date.jour)) {
             if (rdv->horaire.heure < temp->horaire.heure) {
                 temp = rdv;
-                temp->next = nom->rdv_head;
-                nom->rdv_head = temp;
+                temp->next = contact->rdv_head;
+                contact->rdv_head = temp;
                 temp = NULL;
                 break;
             } else {
                 if (rdv->horaire.heure == temp->horaire.heure && rdv->horaire.minute < temp->horaire.minute) {
                     temp = rdv;
-                    temp->next = nom->rdv_head;
-                    nom->rdv_head = temp;
+                    temp->next = contact->rdv_head;
+                    contact->rdv_head = temp;
                     temp = NULL;
                     break;
                 } else {
@@ -487,16 +482,6 @@ void display_all_rendez_vous(t_d_ContactList mylist, char *rdvContactName) {
         rdv_cur = rdv_cur->next;
     }
 }
-
-void display_all_appointment(t_d_contact contact) {
-    t_d_rdv *cur;
-    cur = contact.rdv_head;
-    while (cur != NULL) {
-        display_rendez_vous(*cur);
-        cur = cur->next;
-    }
-}
-
 
 int charPlaces(char *name) {
     return (int) strlen(name) - 1;

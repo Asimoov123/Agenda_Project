@@ -7,6 +7,8 @@
 #include "timer.h"
 #include "agenda.h"
 
+
+
 /*
 
 void compareExecutionTime(int nbOfSearches){
@@ -67,8 +69,6 @@ void autocompletion(char *str, t_d_ContactList mylist) {
                 printf("%s, ", current->nom);
             }
             current = current->next[0];
-
-
         }
     }
 }
@@ -111,73 +111,38 @@ char *scanString1(t_d_ContactList mylist) {
     return p;
 }
 
-void insertFromFile(t_d_ContactList mylist, char* filePath){
-    FILE* fp = fopen(filePath, "r");
+void insertFromFile(t_d_ContactList mylist, char *filePath) {
+    FILE *fp = fopen(filePath, "r");
 
-    if(fp == NULL) {
+    if (fp == NULL) {
         printf("Can't open file : %s\n", strerror(errno));
         exit(1);
     }
 
-    char *buffer = malloc(128*sizeof(char));
-    while (fgets(buffer, 128, fp)){
-        buffer[strlen(buffer)-1] = '\0';
-        char* scannedName = Scan_name(strdup(buffer));
+    char buffer[128];
+    while (fgets(buffer, 1024, fp)) {
+        buffer[strlen(buffer) - 1] = '\0';
+        char *scannedName = Scan_name(strdup(buffer));
         insertContact(&mylist, scannedName);
-        printf("%s\n", scannedName);
-        free(scannedName);
+        free(scannedName);  // Free the memory allocated by strdup and Scan_name
         scannedName = NULL;
     }
-    free(buffer);
-    buffer = NULL;
 
     fclose(fp);
 }
 
 int main() {
     t_d_ContactList mylist = createContactList();
-    char *buff = malloc(128*sizeof(char));
+    char buff[128];
     int run = 1;
 
-//    insertFromFile(mylist, "CSV_Files/1000names_1.csv");
-//    insertFromFile(mylist, "CSV_Files/1000names_2.csv");
-//    insertFromFile(mylist, "CSV_Files/1000names_3.csv");
-//    insertFromFile(mylist, "CSV_Files/1000names_4.csv");
-//    insertFromFile(mylist, "CSV_Files/1000names_5.csv");
 
+    insertFromFile(mylist, "CSV_Files/1000names_1.csv");
+    insertFromFile(mylist, "CSV_Files/1000names_2.csv");
+    insertFromFile(mylist, "CSV_Files/1000names_3.csv");
+    insertFromFile(mylist, "CSV_Files/1000names_4.csv");
+    insertFromFile(mylist, "CSV_Files/1000names_5.csv");
 
-    insertContact(&mylist, Scan_name("Amira Hicks"));
-    insertContact(&mylist, Scan_name("Maddox Medina"));
-    insertContact(&mylist, Scan_name("Elliana McCarthy"));
-    insertContact(&mylist, Scan_name("Devin Mathews"));
-    insertContact(&mylist, Scan_name("Sloan Pollard"));
-    insertContact(&mylist, Scan_name("Jad McKenzie"));
-    insertContact(&mylist, Scan_name("Briar Pena"));
-    insertContact(&mylist, Scan_name("Marcus Ventura"));
-    insertContact(&mylist, Scan_name("Zora Nash"));
-    insertContact(&mylist, Scan_name("Chandler O'Neill"));
-
-    insertContact(&mylist, Scan_name("Kenna Lynch"));
-    insertContact(&mylist, Scan_name("Zane Bentley"));
-    insertContact(&mylist, Scan_name("Jaylin Washington"));
-    insertContact(&mylist, Scan_name("Juan Hodge"));
-    insertContact(&mylist, Scan_name("Coraline Ramos"));
-    insertContact(&mylist, Scan_name("Angel Barker"));
-    insertContact(&mylist, Scan_name("Remington Bryan"));
-    insertContact(&mylist, Scan_name("Jaxtyn Pham"));
-    insertContact(&mylist, Scan_name("Raelyn Benson"));
-    insertContact(&mylist, Scan_name("Desmond Lozano"));
-
-    insertContact(&mylist, Scan_name("Cecelia Guerra"));
-    insertContact(&mylist, Scan_name("Leland Sharp"));
-    insertContact(&mylist, Scan_name("Camryn Chung"));
-    insertContact(&mylist, Scan_name("Ira Hood"));
-    insertContact(&mylist, Scan_name("Briana McGuire"));
-    insertContact(&mylist, Scan_name("Casey Reid"));
-    insertContact(&mylist, Scan_name("Charlee Turner"));
-    insertContact(&mylist, Scan_name("Joshua Franco"));
-    insertContact(&mylist, Scan_name("Charleigh O'Connell"));
-    insertContact(&mylist, Scan_name("Jovanni Krueger"));
 
     while (run) {
         printf("1. Create Contact\n2. Display Contact List\n3. Search Contact\n4. Afficher RDV\n5. Exit\n> ");
@@ -205,8 +170,8 @@ int main() {
 
     }
 
+    freeAll(&mylist);
 
-    free(buff);
-    buff = NULL;
+
     return 0;
 }

@@ -11,15 +11,14 @@ char *scanString(void) {
     int index = 0;
     int size = 1;
     p = (char *) malloc(sizeof(char));
-
     while (1) {
         character = (char) getchar(); // Permet d'attendre la frappe d'un caractère au clavier
 
-        if (character == '\n') { // Vérifie si le charactere est le dernier saisi par l'utilisateur
+        if (character == '\n') { // Vérifie si le caractère est le dernier saisi par l'utilisateur
             p[index] = '\0';  // Termine la chaîne
             break;
         }
-        if (index >= size - 1) { // Realloue de la memoire si necessaire
+        if (index >= size - 1) { // Réalloue de la memoire si nécessaire
             size *= 2;
             char *temp = (char *) realloc(p, size * sizeof(char));
             if (temp == NULL) {
@@ -39,7 +38,7 @@ char *scanString(void) {
 }
 
 char *Scan_name(char *strInput) {
-    char *full_name = malloc(sizeof(strInput));
+    char *full_name = malloc(strlen(strInput) + 1);
     strcpy(full_name, strInput);
 
     for (int i = 0; i < strlen(full_name); i++) {
@@ -49,7 +48,7 @@ char *Scan_name(char *strInput) {
             if (full_name[i] == ' ') {
                 full_name[i] = '_';
                 i--;
-            } else if (full_name[i] < 'a' || 'z' < full_name[i]) {
+            } else if ((full_name[i] < 'a' || 'z' < full_name[i]) && full_name[i] != '_'){
                 for (int j = i; j < strlen(full_name); j++) {
                     full_name[j] = full_name[j + 1];
                 }
@@ -64,7 +63,7 @@ char *Scan_name(char *strInput) {
 It returns a pointer to the newly created contact. */
 t_d_contact *createContact(char *name, int lvl) {
     t_d_contact *contact = malloc(sizeof(t_d_contact));
-    contact->nom = name;
+    contact->nom = strdup(name);
 
     contact->next = (t_d_contact **) malloc(sizeof(t_d_contact *) * (lvl + 1));
     for (int i = 0; i < (lvl + 1); i++) {
@@ -82,8 +81,8 @@ t_d_ContactList createContactList() {
     t_d_ContactList mylist;
     mylist.max_level = 4;
     mylist.heads = (t_d_contact **) malloc(sizeof(t_d_contact *) * mylist.max_level);
-
     for (int i = 0; i < 4; i++) {
+        mylist.heads[i] = (t_d_contact *)malloc(sizeof(t_d_contact));
         mylist.heads[i] = NULL;
     }
     return mylist;
@@ -96,16 +95,15 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
     int currentLvl = 3, previousLvl = 3;
 
     // If the new contact is to be inserted at the beginning of the list
-    if (currCell == NULL || strcmp(currCell->nom, newContactName) > 0) {
+    if (currCell == NULL) {
         t_d_contact *newContact = createContact(newContactName, 3); // First element is always at max level
         for (int c = 0; c < 4; c++) {
-            newContact->next[c] = currCell;
             mylist->heads[c] = newContact;
         }
         return;
     }
 
-    int cmp;
+
     // Locate insertion point for new contact
     while (currentLvl >= 0) {
         while (currCell != NULL &&
@@ -119,7 +117,10 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
             break;
         } else if (strcmp(currCell->nom, newContactName) == 0) {
             printf("Contact already registered.\n");
-            free(prevCell);
+            printf("Freed     : %11s | %p[%li]\n", "newContactName", newContactName, sizeof(newContactName));
+            free(newContactName);
+            newContactName = NULL;
+            printf("Db Check  : %11s | %p[%li]\n", "newContactName", newContactName, sizeof(newContactName));
             return;
         }
         currentLvl--;
@@ -127,38 +128,44 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
 
     // Insert the new contact
     if (currCell == NULL && strcmp(prevCell->nom, newContactName) < 0) { // Insert at the end
+
         t_d_contact *newContact = createContact(newContactName, currentLvl);
         t_d_contact *temp;
         for (int i = 0; i < currentLvl + 1; i++) {
             temp = prevCell;
-            while (temp->next[i] != NULL) {
+            while (temp->next[i] != NULL && i < mylist->max_level) {
                 temp = temp->next[i];
             }
             temp->next[i] = newContact;
         }
+
     } else if (strcmp(currCell->nom, newContactName) > 0) { // Insert Before CurrentCell
         t_d_contact *newContact = createContact(newContactName, previousLvl); // Create new contact
 
         for (int i = 0; i <= currentLvl; i++) {
             newContact->next[i] = currCell;
         }
-        for (int i = currentLvl + 1; i <= previousLvl; i++) {
-            newContact->next[i] = currCell->next[i];
-        }
-        t_d_contact *temp;
-        for (int i = 0; i <= previousLvl; i++) {
-            temp = prevCell;
-            while (temp->next[i] != currCell) {
-                temp = temp->next[i];
+        if (currentLvl<previousLvl){
+            for (int i = currentLvl + 1; i <= previousLvl; i++) {
+                newContact->next[i] = currCell->next[i];
             }
-            temp->next[i] = newContact;
+        }
+        if (prevCell == NULL){
+            for (int c = 0; c < 4; c++) {
+                mylist->heads[c] = newContact;
+            }
+        } else{
+            t_d_contact *temp;
+            for (int i = 0; i <= previousLvl; i++) {
+                temp = prevCell;
+                while (temp->next[i] != currCell && i < mylist->max_level) {
+                    temp = temp->next[i];
+                }
+                temp->next[i] = newContact;
+            }
         }
         return;
     }
-    // Free memory
-    free(currCell);
-    currCell = NULL;
-
 }
 
 
@@ -170,6 +177,7 @@ void delete_all_RDV(t_d_contact *contact) {
         prec = temp;
         temp = temp->next;
         free(prec);
+        prec = NULL;
     }
 }
 
@@ -226,9 +234,8 @@ t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
 
     t_d_contact *prevCell = NULL, *currCell = mylist.heads[3];
     t_d_contact **res = malloc(2 * sizeof(t_d_contact *));
+
     if (res == NULL) {
-        free(currCell);
-        currCell = NULL;
         printf("ERROR: Failed to allocate memory.\n");
         exit(1);
     }
@@ -291,7 +298,7 @@ int *checkDate(char *strInput) {
                  (mm == 1 || mm == 3 || mm == 5 || mm == 7 || mm == 8 || mm == 10 || mm == 12)) || // Mois à 31 jours
                 ((jj >= 1 && jj <= 30) && (mm == 4 || mm == 6 || mm == 9 || mm == 11)) || // Mois à 30 jours
                 ((jj >= 1 && jj <= 28) && (mm == 2)) || // Mois de février
-                (jj == 29 && mm == 2 && (aaaa % 400 == 0 || (aaaa % 4 == 0 && aaaa % 100 != 0)))) { // Années Bisextile
+                (jj == 29 && mm == 2 && (aaaa % 400 == 0 || (aaaa % 4 == 0 && aaaa % 100 != 0)))) { // Années bissextiles
                 intDate[0] = 1;
                 return intDate;
             }
@@ -508,7 +515,6 @@ void display_level_Contact_aligned(t_d_ContactList mylist, int lvl) {
                 printf("---%.*s------", charPlaces(current0Cell->nom),
                        "-----------------------------"); // https://stackoverflow.com/questions/14678948/how-to-repeat-a-char-using-printf
                 current0Cell = current0Cell->next[0]; // temporary cell is set to its successor (on the first line)
-                if (current0Cell == NULL) break;
             }
         }
         if (currentLvlCell == NULL || current0Cell == NULL) break;
@@ -526,3 +532,13 @@ void display_all_levels_Contact_aligned(t_d_ContactList mylist) {
     }
 }
 
+
+
+void freeAll(t_d_ContactList *mylist){
+    t_d_contact *temp;
+    while (mylist->heads[0] != NULL){
+        temp = mylist->heads[0];
+        mylist->heads[0] = mylist->heads[0]->next[0];
+        free(temp);
+    }
+}

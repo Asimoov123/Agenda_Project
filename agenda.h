@@ -4,6 +4,8 @@
 #include "cell.h"
 #include "list.h"
 
+
+
 typedef struct date {
     int jour;
     int mois;
@@ -76,5 +78,8 @@ void delete_Contact(t_d_ContactList *, char *);
 t_d_contact **isContactInList(t_d_ContactList, char *);
 void searchContact(t_d_ContactList mylist, char * searchContactName);
 //void delete_Contact(t_d_ContactList *, t_d_contact *);
+
+void freeAll(t_d_ContactList *);
+
 
 #endif //AGENDA_PROJECT_AGENDA_H

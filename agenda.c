@@ -29,8 +29,7 @@ char *scanString(void) {
             }
             p = temp;
         }
-        p[index] = character;
-        index++;
+        p[index++] = character;
     }
     return p;
 }
@@ -46,7 +45,7 @@ char *Scan_name(char *strInput) {
             if (full_name[i] == ' ') {
                 full_name[i] = '_';
                 i--;
-            } else if ((full_name[i] < 'a' || 'z' < full_name[i]) && full_name[i] != '_'){
+            } else if ((full_name[i] < 'a' || 'z' < full_name[i]) && full_name[i] != '_') {
                 for (int j = i; j < strlen(full_name); j++) {
                     full_name[j] = full_name[j + 1];
                 }
@@ -80,7 +79,7 @@ t_d_ContactList createContactList() {
     mylist.max_level = 4;
     mylist.heads = (t_d_contact **) malloc(sizeof(t_d_contact *) * mylist.max_level);
     for (int i = 0; i < 4; i++) {
-        mylist.heads[i] = (t_d_contact *)malloc(sizeof(t_d_contact));
+        mylist.heads[i] = (t_d_contact *) malloc(sizeof(t_d_contact));
         mylist.heads[i] = NULL;
     }
     return mylist;
@@ -115,10 +114,8 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
             break;
         } else if (strcmp(currCell->nom, newContactName) == 0) {
             printf("Contact already registered.\n");
-            printf("Freed     : %11s | %p[%li]\n", "newContactName", newContactName, sizeof(newContactName));
             free(newContactName);
             newContactName = NULL;
-            printf("Db Check  : %11s | %p[%li]\n", "newContactName", newContactName, sizeof(newContactName));
             return;
         }
         currentLvl--;
@@ -143,16 +140,16 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
         for (int i = 0; i <= currentLvl; i++) {
             newContact->next[i] = currCell;
         }
-        if (currentLvl<previousLvl){
+        if (currentLvl < previousLvl) {
             for (int i = currentLvl + 1; i <= previousLvl; i++) {
                 newContact->next[i] = currCell->next[i];
             }
         }
-        if (prevCell == NULL){
+        if (prevCell == NULL) {
             for (int c = 0; c < 4; c++) {
                 mylist->heads[c] = newContact;
             }
-        } else{
+        } else {
             t_d_contact *temp;
             for (int i = 0; i <= previousLvl; i++) {
                 temp = prevCell;
@@ -256,7 +253,7 @@ t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
 
 
 void searchContact(t_d_ContactList mylist, char *searchContactName) {
-    if (strlen(searchContactName) < 3){
+    if (strlen(searchContactName) < 3) {
         printf("Too short input.");
         return;
     }
@@ -293,7 +290,8 @@ int *checkDate(char *strInput) {
                  (mm == 1 || mm == 3 || mm == 5 || mm == 7 || mm == 8 || mm == 10 || mm == 12)) || // Mois à 31 jours
                 ((jj >= 1 && jj <= 30) && (mm == 4 || mm == 6 || mm == 9 || mm == 11)) || // Mois à 30 jours
                 ((jj >= 1 && jj <= 28) && (mm == 2)) || // Mois de février
-                (jj == 29 && mm == 2 && (aaaa % 400 == 0 || (aaaa % 4 == 0 && aaaa % 100 != 0)))) { // Années bissextiles
+                (jj == 29 && mm == 2 &&
+                 (aaaa % 400 == 0 || (aaaa % 4 == 0 && aaaa % 100 != 0)))) { // Années bissextiles
                 intDate[0] = 1;
                 return intDate;
             }
@@ -518,12 +516,15 @@ void display_all_levels_Contact_aligned(t_d_ContactList mylist) {
 }
 
 
-
-void freeAll(t_d_ContactList *mylist){
+void freeAll(t_d_ContactList *mylist) {
     t_d_contact *temp;
-    while (mylist->heads[0] != NULL){
+    while (mylist->heads[0] != NULL) {
         temp = mylist->heads[0];
         mylist->heads[0] = mylist->heads[0]->next[0];
+        delete_all_RDV(temp);
+        free(temp->rdv_head);
+        temp->rdv_head = NULL;
         free(temp);
+        temp = NULL;
     }
 }

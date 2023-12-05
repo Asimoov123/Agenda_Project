@@ -56,6 +56,39 @@ void compareExecutionTime(int nbOfSearches){
 }
 */
 
+char* saveToFile(t_d_ContactList mylist, char *filePath) {
+    FILE *fpt = NULL;
+    if (filePath == NULL) {
+        filePath = malloc(512*sizeof(char));
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+        sprintf(filePath, "CSV_Files/appointments_%02d-%02d-%04d_%02d-%02d.csv", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min);
+
+    }
+
+    fpt = fopen(filePath, "w");
+    if (fpt == NULL) {
+        printf("can't open\n");
+        return NULL;
+    }
+    fprintf(fpt,"Name; Appointments\n");
+
+    t_d_contact *temp = mylist.heads[0];
+    while (temp != NULL) {
+        fprintf(fpt,"%s;", temp->nom);
+        t_d_rdv *tempRDV = temp->rdv_head;
+        while (tempRDV != NULL){
+            fprintf(fpt,"{%02d/%02d/%04d,%02d:%02d,%02d:%02d}", tempRDV->date.jour, tempRDV->date.mois, tempRDV->date.annee, tempRDV->horaire.heure, tempRDV->horaire.minute, tempRDV->duree.heure, tempRDV->duree.minute);
+            tempRDV = tempRDV->next;
+        }
+        fprintf(fpt,"\n");
+        temp = temp->next[0];
+    }
+    fclose(fpt);
+    return filePath;
+}
+
+
 // Function to read a key press without waiting for enter
 char getch() {
     char buf = 0;

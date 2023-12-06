@@ -9,7 +9,6 @@
 #include <windows.h>
 
 
-
 /*
 
 void compareExecutionTime(int nbOfSearches){
@@ -56,13 +55,14 @@ void compareExecutionTime(int nbOfSearches){
 }
 */
 
-char* saveToFile(t_d_ContactList mylist, char *filePath) {
+char *saveToFile(t_d_ContactList mylist, char *filePath) {
     FILE *fpt = NULL;
     if (filePath == NULL) {
-        filePath = malloc(512*sizeof(char));
+        filePath = malloc(512 * sizeof(char));
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
-        sprintf(filePath, "CSV_Files/appointments_%02d-%02d-%04d_%02d-%02d.csv", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min);
+        sprintf(filePath, "CSV_Files/appointments_%02d-%02d-%04d_%02d-%02d.csv", tm.tm_mday, tm.tm_mon + 1,
+                tm.tm_year + 1900, tm.tm_hour, tm.tm_min);
 
     }
 
@@ -71,21 +71,64 @@ char* saveToFile(t_d_ContactList mylist, char *filePath) {
         printf("can't open\n");
         return NULL;
     }
-    fprintf(fpt,"Name; Appointments\n");
 
     t_d_contact *temp = mylist.heads[0];
     while (temp != NULL) {
-        fprintf(fpt,"%s;", temp->nom);
+        fprintf(fpt, "%s;", temp->nom);
         t_d_rdv *tempRDV = temp->rdv_head;
-        while (tempRDV != NULL){
-            fprintf(fpt,"{%02d/%02d/%04d,%02d:%02d,%02d:%02d}", tempRDV->date.jour, tempRDV->date.mois, tempRDV->date.annee, tempRDV->horaire.heure, tempRDV->horaire.minute, tempRDV->duree.heure, tempRDV->duree.minute);
+        while (tempRDV != NULL) {
+            fprintf(fpt, "{;%s;%02d/%02d/%04d;%02d:%02d;%02d:%02d;};", tempRDV->objet, tempRDV->date.jour,
+                    tempRDV->date.mois, tempRDV->date.annee, tempRDV->horaire.heure, tempRDV->horaire.minute,
+                    tempRDV->duree.heure, tempRDV->duree.minute);
             tempRDV = tempRDV->next;
         }
-        fprintf(fpt,"\n");
+        fprintf(fpt, "\n");
         temp = temp->next[0];
     }
     fclose(fpt);
     return filePath;
+}
+
+void loadFromFile(t_d_ContactList* contactList, char* filePath) {
+    FILE *fpt = fopen(filePath, "r");
+    if (fpt == NULL) {
+        printf("[-] Failed to load file : %s\n", strerror(errno));
+        return;
+    }
+    char line[1024];
+    char *strToken, *name, *object, *dateStr, *timeStr, *durationStr;
+    t_d_contact *temp;
+    while (fgets(line, 1024, fpt)) {
+        strToken = strtok(line, ";");
+        name = Scan_name(strdup(strToken));
+
+        if (!isContactInList(*contactList, name)){
+            printf("[+] %s\n", name);
+
+        }
+        temp = insertContact(contactList, name);
+        while (strToken != NULL) {
+            if (strcmp(strToken, "{") == 0) {
+                strToken = strtok(NULL, ";");
+                object = strdup(strToken);
+                strToken = strtok(NULL, ";");
+                dateStr = strdup(strToken);
+                strToken = strtok(NULL, ";");
+                timeStr = strdup(strToken);
+                strToken = strtok(NULL, ";");
+                durationStr = strdup(strToken);
+                strToken = strtok(NULL, ";");
+                if (strcmp(strToken, "}") == 0) {
+                    load_Rendez_Vous(temp, object, dateStr, timeStr, durationStr);
+
+                } else {
+                    printf("[-] Can't load file : Wrong file structure\n");
+                    return;
+                }
+            }
+            strToken = strtok(NULL, ";");
+        }
+    }
 }
 
 
@@ -120,7 +163,6 @@ char getch() {
 char **autocomplete(char input[], t_d_ContactList mylist) {
     // If list is empty
     if (mylist.heads[3] == NULL) {
-        printf("empty\n");
         return NULL;
     }
 
@@ -157,7 +199,6 @@ char **autocomplete(char input[], t_d_ContactList mylist) {
         currentLvl--;
     }
 
-
     // If no matches, do nothing and return an empty string
     if (matchCount == 0) {
         return NULL;
@@ -178,10 +219,10 @@ char *autocompleteResearch(t_d_ContactList mylist) {
         result[i] = NULL;
     }
 
-    int i = 0, j = 0, k = 0, found = 0;
+    int i = 0, j = 0, k = 0, c = 0, found = 0;
 
     // Main loop to read user input until Enter key (ASCII 13) is pressed
-    while ((input[i] = getch()) != 13) {
+    while ((input[i] = getch()) != 13 && input[i] != 27) {
         // Check if the input character is an alphabetical character or a space
         if (('A' <= input[i] && input[i] <= 'Z') || ('a' <= input[i] && input[i] <= 'z') || input[i] == ' ') {
             printf("%c", input[i]);
@@ -221,22 +262,21 @@ char *autocompleteResearch(t_d_ContactList mylist) {
             i++;
         }
     }
+    if (input[i]==27){
+        return NULL;
+    }
 
     // Null-terminate the input string
     input[i] = '\0';
 
-    char *ScannedName = Scan_name(alphabeticalInput);
     // If no autocomplete results check if the input is in the contact list
     if (!result || result[j] == NULL) {
-        // If the contact is found in the list, print a message and return the input
-        if (isContactInList(mylist, ScannedName)) {
-            printf("Contact found.");
-            return ScannedName;
-        }
         // If the contact is not found, return the input
-        return ScannedName;
+        return Scan_name(alphabeticalInput);
     }
-    // If there are autocomplete results, print a message and return the current result
+    // If there are autocomplete results, return the current result
+    while (result[c + 1]) c++;
+    j = (j == 0) ? c : j - 1;
     return result[j];
 }
 
@@ -294,36 +334,54 @@ int main() {
         if (fgets(buff, 128, stdin) != NULL) {
             if (strcmp(buff, "1\n") == 0) {
                 printf("Please enter the first and last name of the contact to search:\n");
-                autocompleteResearch(mylist);
+                result = autocompleteResearch(mylist);
+                if (result) {
+                    searchContact(mylist, result);
+                    free(result);
+                    result = NULL;
+                }
 
+                fgets(buff, 128, stdin);
+                printf("\033c");
             } else if (strcmp(buff, "2\n") == 0) {
                 printf("Please enter the first and last name of the contact to display appointments:\n");
                 result = autocompleteResearch(mylist);
-                printf("\33[2K\r");
-                display_all_rendez_vous(mylist, result);
-
+                if (result){
+                    display_all_rendez_vous(mylist, result);
+                    free(result);
+                    result = NULL;
+                }
+                fgets(buff, 128, stdin);
+                printf("\033c");
             } else if (strcmp(buff, "3\n") == 0) {
                 printf("Please enter the first and last name of the contact to insert:\n");
+                char *contact_name = Scan_name(scanString());
                 insertContact(&mylist, Scan_name(scanString()));
-
+                if (isContactInList(mylist, contact_name)) {
+                    printf("\033c");
+                    printf("[+] Contact successfully registered\n");
+                }
             } else if (strcmp(buff, "4\n") == 0) {
                 printf("Please enter the first and last name of the contact:\n");
                 result = autocompleteResearch(mylist);
-                t_d_contact **temp = isContactInList(mylist, result);
-                if (temp == NULL) {
-                    printf("\nContact not found. Do you want to create a new contact ? (y/n)\n");
-                    if (fgets(buff, 128, stdin) != NULL) {
-                        if (strcmp(buff, "y\n") == 0) {
-                            insertContact(&mylist, result);
-                            rendez_Vous(isContactInList(mylist, result)[1]);
-                        } else {
-                            printf("Back to the menu.\n");
+                if (result) {
+                    t_d_contact **temp = isContactInList(mylist, result);
+                    if (temp == NULL) {
+                        printf("\nContact not found. Do you want to create a new contact ? (y/n)\n");
+                        if (fgets(buff, 128, stdin) != NULL) {
+                            if (strcmp(buff, "y\n") == 0) {
+                                insertContact(&mylist, result);
+                                create_Rendez_Vous(isContactInList(mylist, result)[1]);
+                            } else {
+                                printf("Back to the menu.\n");
+                            }
                         }
+                    } else {
+                        create_Rendez_Vous(temp[1]);
                     }
-                } else {
-                    rendez_Vous(temp[1]);
+                    free(result);
+                    result = NULL;
                 }
-
             } else if (strcmp(buff, "5\n") == 0) {
                 printf("Please enter the first and last name of the contact to insert:\n");
                 char *contact_name = Scan_name(scanString());
@@ -337,26 +395,31 @@ int main() {
                         if (temp != NULL) {
                             delete_all_RDV(temp);
                         } else {
+                            printf("\033c");
                             printf("Contact not found.\n");
                         }
                     }
                 }
+                free(contact_name);
+                contact_name = NULL;
 
             } else if (strcmp(buff, "6\n") == 0) {
-                char* filePath = NULL;
+                char *filePath = NULL;
                 filePath = strdup(saveToFile(mylist, NULL));
-                if (filePath != NULL) printf("[+] File Saved - %s", filePath);
+                if (filePath != NULL) printf("[+] File Saved at : %s", filePath);
             } else if (strcmp(buff, "7\n") == 0) {
-                printf("Soon...\n");
+                loadFromFile(&mylist, scanString());
             } else if (strcmp(buff, "8\n") == 0) {
                 run = 0;
             } else if (strcmp(buff, "\n") != 0) {
+                printf("\033c");
                 printf("Unknown Function\n");
             }
         } else {
+            printf("\033c");
             printf("Input Error\n");
         }
-        printf("\n");
+
 
     }
 

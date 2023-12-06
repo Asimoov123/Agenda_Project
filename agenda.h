@@ -57,15 +57,16 @@ int charPlaces(char *name);
 t_d_ContactList createContactList();
 
 
-void insertContact(t_d_ContactList *, char *);
+t_d_contact* insertContact(t_d_ContactList *, char *);
 
 int *checkDate(char *strInput);
 
 int *checkTime(char *);
 
-void rendez_Vous(t_d_contact *);
-
-void display_rendez_vous(t_d_rdv);
+void load_Rendez_Vous(t_d_contact*, char*, char*, char*, char*);
+void create_Rendez_Vous(t_d_contact *);
+void insert_Rendez_Vous(t_d_contact *, char*, const int*, const int*, const int*);
+void display_Rendez_Vous(t_d_rdv);
 
 void display_all_rendez_vous(t_d_ContactList, char *);
 

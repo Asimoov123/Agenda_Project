@@ -87,7 +87,7 @@ t_d_ContactList createContactList() {
 
 
 // This function creates and inserts alphabetically a new contact with a given name.
-void insertContact(t_d_ContactList *mylist, char *newContactName) {
+t_d_contact * insertContact(t_d_ContactList *mylist, char *newContactName) {
     t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
     int currentLvl = 3, previousLvl = 3;
 
@@ -97,7 +97,7 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
         for (int c = 0; c < 4; c++) {
             mylist->heads[c] = newContact;
         }
-        return;
+        return newContact;
     }
 
 
@@ -116,7 +116,7 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
             printf("Contact already registered.\n");
             free(newContactName);
             newContactName = NULL;
-            return;
+            return currCell;
         }
         currentLvl--;
     }
@@ -133,7 +133,7 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
             }
             temp->next[i] = newContact;
         }
-
+        return newContact;
     } else if (strcmp(currCell->nom, newContactName) > 0) { // Insert Before CurrentCell
         t_d_contact *newContact = createContact(newContactName, previousLvl); // Create new contact
 
@@ -159,7 +159,7 @@ void insertContact(t_d_ContactList *mylist, char *newContactName) {
                 temp->next[i] = newContact;
             }
         }
-        return;
+        return newContact;
     }
 }
 
@@ -220,7 +220,7 @@ void delete_all_RDV(t_d_contact *contact) {
 
 t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
     // If list is empty
-    if (mylist.heads[3] == NULL) {
+    if (mylist.heads[3] == NULL || searchContactName == NULL) {
         return NULL;
     }
 
@@ -253,36 +253,36 @@ t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
 
 
 void searchContact(t_d_ContactList mylist, char *searchContactName) {
-    if (strlen(searchContactName) < 3) {
-        printf("Too short input.");
-        return;
-    }
     if (isContactInList(mylist, searchContactName))
-        printf("Contact Found.");
+        printf("Contact Found\n");
     else
-        printf("Contact Not Found.");
+        printf("Contact Not Found\n");
 }
 
 
 int *checkDate(char *strInput) {
     const char *separator = "/";
-    int *intDate = malloc(4 * sizeof(int));
+    int *intDate = malloc(3 * sizeof(int));
     char *strToken = strtok(strInput, separator);
-    int i = 1, jj, mm, aaaa;
-    while (strToken != NULL && i < 4) {
+    int i = 0, jj, mm, aaaa;
+    while (strToken != NULL && i < 3) {
         for (int k = 0; k < strlen(strToken); k++) {
             if (!isdigit(strToken[k])) {
-                intDate[0] = 0;
-                return intDate;
+                printf("!digit\n");
+                free(strInput);
+                strInput = NULL;
+                free(intDate);
+                intDate = NULL;
+                return NULL;
             }
         }
         intDate[i++] = strtol(strToken, NULL, 10);
         strToken = strtok(NULL, separator);
     }
 
-    jj = intDate[1];
-    mm = intDate[2];
-    aaaa = intDate[3];
+    jj = intDate[0];
+    mm = intDate[1];
+    aaaa = intDate[2];
 
     if (aaaa >= 1900 && aaaa <= 9999) {
         if (mm >= 1 && mm <= 12) {
@@ -290,111 +290,151 @@ int *checkDate(char *strInput) {
                  (mm == 1 || mm == 3 || mm == 5 || mm == 7 || mm == 8 || mm == 10 || mm == 12)) || // Mois à 31 jours
                 ((jj >= 1 && jj <= 30) && (mm == 4 || mm == 6 || mm == 9 || mm == 11)) || // Mois à 30 jours
                 ((jj >= 1 && jj <= 28) && (mm == 2)) || // Mois de février
-                (jj == 29 && mm == 2 &&
-                 (aaaa % 400 == 0 || (aaaa % 4 == 0 && aaaa % 100 != 0)))) { // Années bissextiles
-                intDate[0] = 1;
+                (jj == 29 && mm == 2 && (aaaa % 400 == 0 || (aaaa % 4 == 0 && aaaa % 100 != 0)))) { //Années bissextiles
                 return intDate;
             }
         }
     }
-    intDate[0] = 0;
-    return intDate;
+    printf("NotvalidDate\n");
+    free(strInput);
+    strInput = NULL;
+    free(intDate);
+    intDate = NULL;
+    return NULL;
 }
 
 int *checkTime(char *strInput) {
     const char *separator = ":";
-    int *intTime = malloc(3 * sizeof(int));
+    int *intTime = malloc(2 * sizeof(int));
     char *strToken = strtok(strInput, separator);
-    int i = 1, hh, mm;
-    while (strToken != NULL && i < 3) {
+    int i = 0, hh, mm;
+
+    while (strToken != NULL && i < 2) {
         for (int k = 0; k < strlen(strToken); k++) {
             if (!isdigit(strToken[k])) {
-                intTime[0] = 0;
-                return intTime;
+                free(strInput);
+                strInput = NULL;
+                free(intTime);
+                intTime = NULL;
+                return NULL;
             }
         }
         intTime[i++] = strtol(strToken, NULL, 10);
         strToken = strtok(NULL, separator);
     }
 
-    hh = intTime[1];
-    mm = intTime[2];
+    hh = intTime[0];
+    mm = intTime[1];
 
     if (hh >= 0 && hh <= 23) {
         if (mm >= 0 && mm <= 59) {
-            intTime[0] = 1;
             return intTime;
         }
     }
 
-    intTime[0] = 0;
-    return intTime;
+    free(strInput);
+    strInput = NULL;
+    free(intTime);
+    intTime = NULL;
+    return NULL;
+}
+
+void load_Rendez_Vous(t_d_contact *contact, char *object, char *dateStr, char *timeStr, char *durationStr) {
+    int *intDate = checkDate((dateStr));
+    if (intDate == NULL) {
+        return;
+    }
+    int *intTime = checkTime((timeStr));
+    if (intTime == NULL) {
+        return;
+    }
+    int *intDuration = checkTime((durationStr));
+    if (intDuration == NULL) {
+        return;
+    }
+    insert_Rendez_Vous(contact, object, intDate, intTime, intDuration);
+}
+
+void create_Rendez_Vous(t_d_contact *contact) {
+    printf("\nWhat is your appointment about? : \n");
+    char *object = scanString();
+    printf("Please enter the date of your appointment in the following format dd/mm/yyyy : \n");
+    char *dateStr = scanString();
+    int *intDate = checkDate((strdup(dateStr)));
+    while (intDate == NULL) {
+        printf("Invalid date\nPlease enter the date of your appointment in the following format dd/mm/yyyy : \n");
+        dateStr = scanString();
+        intDate = checkDate(strdup(dateStr));
+        free(dateStr);
+        dateStr = NULL;
+    }
+    if (dateStr) {
+        free(dateStr);
+        dateStr = NULL;
+    }
+
+    printf("Please enter the appointment time in the following format hh:mm : \n");
+    char *timeStr = scanString();
+    int *intTime = checkTime((strdup(timeStr)));
+    while (intTime == NULL) {
+        printf("/!\\Invalid time\nPlease enter the appointment time in the following format hh:mm : \n");
+        timeStr = scanString();
+        intTime = checkTime((strdup(timeStr)));
+        free(timeStr);
+        timeStr = NULL;
+    }
+    if (timeStr) {
+        free(timeStr);
+        timeStr = NULL;
+    }
+
+    printf("Please enter the appointment duration time in the following format hh:mm : \n");
+    char *durationStr = scanString();
+    int *intDuration = checkTime((strdup(durationStr)));
+    while (intDuration == NULL) {
+        printf("/!\\Invalid time\nPlease enter the appointment duration time in the following format hh:mm : \n");
+        durationStr = scanString();
+        intDuration = checkTime((strdup(durationStr)));
+        free(durationStr);
+        durationStr = NULL;
+    }
+    if (durationStr) {
+        free(durationStr);
+        durationStr = NULL;
+    }
+
+    insert_Rendez_Vous(contact, object, intDate, intTime, intDuration);
+
+    free(intDate);
+    intDate = NULL;
+    free(intTime);
+    intTime = NULL;
+    free(intDuration);
+    intDuration = NULL;
 }
 
 
-void rendez_Vous(t_d_contact *contact) {
+void insert_Rendez_Vous(t_d_contact *contact, char *object, const int *intDate, const int *intTime, const int *intDuration) {
     t_d_rdv *rdv = malloc(sizeof(t_d_rdv));
     rdv->next = NULL;
     t_d_rdv *temp;
     t_d_rdv *prev;
     temp = contact->rdv_head;
-
-    printf("What is your appointment about? : \n");
-    char *texte = scanString();
-    rdv->objet = texte;
-    printf("Please enter the date of your appointment in the following format dd/mm/yyyy : \n");
-    char *dateStr = scanString();
-    int *intDate = checkDate((dateStr));
-    while (intDate[0] == 0) {
-        printf("Invalid date\nPlease enter the date of your appointment in the following format dd/mm/yyyy : \n");
-        dateStr = scanString();
-        intDate = checkDate((dateStr));
-    }
-    rdv->date.jour = intDate[1];
-    rdv->date.mois = intDate[2];
-    rdv->date.annee = intDate[3];
-
-    printf("Please enter the appointment time in the following format hh:mm : \n");
-    char *timeStr = scanString();
-    int *intTime = checkTime((timeStr));
-    while (intTime[0] == 0) {
-        printf("/!\\Invalid time\nPlease enter the appointment time in the following format hh:mm : \n");
-        timeStr = scanString();
-        intTime = checkTime((timeStr));
-    }
-
-    rdv->horaire.heure = intTime[1];
-    rdv->horaire.minute = intTime[2];
+    rdv->objet = object;
 
 
-    printf("Please enter the appointment duration time in the following format hh:mm : \n");
-    char *durationStr = scanString();
-    int *intDuration = checkTime((durationStr));
-    while (intDuration[0] == 0) {
-        printf("/!\\Invalid time\nPlease enter the appointment duration time in the following format hh:mm : \n");
-        durationStr = scanString();
-        intDuration = checkTime((durationStr));
-    }
-    rdv->duree.heure = intDuration[1];
-    rdv->duree.minute = intDuration[2];
+    rdv->date.jour = intDate[0];
+    rdv->date.mois = intDate[1];
+    rdv->date.annee = intDate[2];
 
-    // Je ne sais pas s'ils sont tous utiles
-    free(dateStr);
-    dateStr = NULL;
-    free(intDate);
-    intDate = NULL;
-    free(timeStr);
-    timeStr = NULL;
-    free(intTime);
-    intTime = NULL;
-    free(durationStr);
-    durationStr = NULL;
-    free(intDuration);
-    intDuration = NULL;
+    rdv->horaire.heure = intTime[0];
+    rdv->horaire.minute = intTime[1];
+
+    rdv->duree.heure = intDuration[0];
+    rdv->duree.minute = intDuration[1];
 
 
     // Rajout dans la liste par ordre croissant
-
     if (temp == NULL) {
         contact->rdv_head = rdv;
         contact->rdv_tail = rdv;
@@ -456,7 +496,7 @@ void rendez_Vous(t_d_contact *contact) {
     rdv->next = temp;
 }
 
-void display_rendez_vous(t_d_rdv rdv) {
+void display_Rendez_Vous(t_d_rdv rdv) {
     printf("\tObject : '%s'\n", rdv.objet);
     printf("\t\tDate : %02d/%02d/%04d\n", rdv.date.jour, rdv.date.mois, rdv.date.annee);
     printf("\t\tTime : %02d:%02d\n", rdv.horaire.heure, rdv.horaire.minute);
@@ -466,17 +506,17 @@ void display_rendez_vous(t_d_rdv rdv) {
 
 
 void display_all_rendez_vous(t_d_ContactList mylist, char *rdvContactName) {
-    t_d_contact *contact = isContactInList(mylist, rdvContactName)[1];
-    if (contact == NULL) {
+    t_d_contact **isContact = isContactInList(mylist, rdvContactName);
+    if (isContact == NULL) {
         printf("Contact not found\n");
         return;
     }
-
+    t_d_contact *contact = isContact[1];
     t_d_rdv *rdv_cur;
     rdv_cur = contact->rdv_head;
     printf("%s's appointments :\n", contact->nom);
     while (rdv_cur != NULL) {
-        display_rendez_vous(*rdv_cur);
+        display_Rendez_Vous(*rdv_cur);
         rdv_cur = rdv_cur->next;
     }
 }

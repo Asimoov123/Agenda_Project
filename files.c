@@ -40,6 +40,7 @@ char *saveToFile(t_d_ContactList mylist, char *filePath) {
     return filePath;
 }
 
+
 void loadFromFile(t_d_ContactList* contactList, char* filePath) {
     FILE *fpt = fopen(filePath, "r");
     if (fpt == NULL) {

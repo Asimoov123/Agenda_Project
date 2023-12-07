@@ -5,34 +5,34 @@
 
 
 t_d_list createList(int lvl) {
-    t_d_list mylist;
-    mylist.max_level = lvl + 1;
-    mylist.heads = (t_d_cell **) malloc(sizeof(t_d_cell *) * mylist.max_level);
+    t_d_list intList;
+    intList.max_level = lvl + 1;
+    intList.heads = (t_d_cell **) malloc(sizeof(t_d_cell *) * intList.max_level);
 
-    for (int i = 0; i < mylist.max_level; i++) {
-        mylist.heads[i] = NULL;
+    for (int i = 0; i < intList.max_level; i++) {
+        intList.heads[i] = NULL;
     }
-    return mylist;
+    return intList;
 }
 
-void addHead(t_d_list *mylist, int val, int lvl) {
+void addHead(t_d_list *intList, int val, int lvl) {
     // Same as :
-    // if (lvl > mylist->max_level-1)
-    //      lvl = mylist->max_level-1;
-    lvl = (lvl > mylist->max_level - 1) ? mylist->max_level - 1 : lvl;
+    // if (lvl > intList->max_level-1)
+    //      lvl = intList->max_level-1;
+    lvl = (lvl > intList->max_level - 1) ? intList->max_level - 1 : lvl;
     t_d_cell *newCell = createCell(val, lvl);
     for (int i = 0; i < newCell->level; i++) {
-        newCell->next[i] = mylist->heads[i];
+        newCell->next[i] = intList->heads[i];
     }
     for (int i = 0; i < newCell->level; i++) {
-        mylist->heads[i] = newCell;
+        intList->heads[i] = newCell;
     }
 }
 
 
-void display_level(t_d_list mylist, int lvl) {
+void display_level(t_d_list intList, int lvl) {
     printf("[list head_%d @-]-->", lvl);
-    t_d_cell *currentCell = mylist.heads[lvl];
+    t_d_cell *currentCell = intList.heads[lvl];
     while (currentCell != NULL) { // for each cell on the given level
         printf("[ %d|@-]-->", currentCell->value); // display the cell with its value
         currentCell = currentCell->next[lvl]; // move through the list
@@ -40,9 +40,9 @@ void display_level(t_d_list mylist, int lvl) {
     printf("NULL\n");
 }
 
-void display_all_levels(t_d_list mylist) {
-    for (int i = 0; i < mylist.max_level; i++) {
-        display_level(mylist, i);
+void display_all_levels(t_d_list intList) {
+    for (int i = 0; i < intList.max_level; i++) {
+        display_level(intList, i);
     }
 }
 
@@ -74,12 +74,12 @@ int numPlaces(int n) {
     return r;
 }
 
-void display_level_aligned(t_d_list mylist, int lvl) {
+void display_level_aligned(t_d_list intList, int lvl) {
 
     printf("[list head_%d @-]--", lvl);
 
-    t_d_cell *current0Cell = mylist.heads[0]; // temporary cell
-    t_d_cell *currentLvlCell = mylist.heads[lvl]; // temporary cell
+    t_d_cell *current0Cell = intList.heads[0]; // temporary cell
+    t_d_cell *currentLvlCell = intList.heads[lvl]; // temporary cell
 
     while (current0Cell != NULL) {
         if (current0Cell !=
@@ -99,35 +99,35 @@ void display_level_aligned(t_d_list mylist, int lvl) {
 }
 
 
-void display_all_levels_aligned(t_d_list mylist) {
-    for (int i = 0; i < mylist.max_level; i++) {
-        display_level_aligned(mylist, i);
+void display_all_levels_aligned(t_d_list intList) {
+    for (int i = 0; i < intList.max_level; i++) {
+        display_level_aligned(intList, i);
     }
 }
 
 
-void add_Increasing_Order(t_d_list *mylist, int val, int lvl) {
-    if (mylist->heads[0] == NULL) {
-        addHead(mylist, val, lvl);
+void add_Increasing_Order(t_d_list *intList, int val, int lvl) {
+    if (intList->heads[0] == NULL) {
+        addHead(intList, val, lvl);
         return;
     }
-    if (mylist->heads[0]->value > val) { // addHead if the value we want to insert is smaller than the first element
-        addHead(mylist, val, lvl);
+    if (intList->heads[0]->value > val) { // addHead if the value we want to insert is smaller than the first element
+        addHead(intList, val, lvl);
     } else {
-        lvl = (lvl > mylist->max_level - 1) ? mylist->max_level - 1 : lvl;
+        lvl = (lvl > intList->max_level - 1) ? intList->max_level - 1 : lvl;
 
         t_d_cell *newCell = createCell(val, lvl); // create new cell
         t_d_cell *current; // temporary cell to browse the list
-        t_d_cell *update[mylist->max_level]; // list of pointers initialized at NULL
-        for (int i = 0; i < mylist->max_level; i++) {
+        t_d_cell *update[intList->max_level]; // list of pointers initialized at NULL
+        for (int i = 0; i < intList->max_level; i++) {
             update[i] = NULL;
         }
 
         for (int i = newCell->level - 1; i >= 0; i--) { // going from the highest lvl of the new cell to the first level
-            current = mylist->heads[i]; // set current to head
+            current = intList->heads[i]; // set current to head
             if (current == NULL) {
                 newCell->next[i] = NULL;
-                mylist->heads[i] = newCell;
+                intList->heads[i] = newCell;
 
             } else {
                 while (current->next[i] != NULL && current->value <
@@ -149,8 +149,9 @@ void add_Increasing_Order(t_d_list *mylist, int val, int lvl) {
     }
 }
 
-int isValueInListLineaire(t_d_list mylist, int val) {
-    t_d_cell *tempCell = mylist.heads[0];
+
+int isValueInListLinear(t_d_list intList, int val) {
+    t_d_cell *tempCell = intList.heads[0];
     if (tempCell != NULL) {
         while (tempCell->next[0] != NULL) {
             if (tempCell->value == val) {
@@ -163,15 +164,15 @@ int isValueInListLineaire(t_d_list mylist, int val) {
 }
 
 
-int isValueInListMultiniveaux(t_d_list mylist, int val) {
-    if (mylist.heads[0] == NULL) {
+int isValueInListMultiLvl(t_d_list intList, int val) {
+    if (intList.heads[0] == NULL) {
         return 0;
     }
-    if (mylist.heads[0]->value == val) { // addHead if the value we want to insert is smaller than the first element
+    if (intList.heads[0]->value == val) { // addHead if the value we want to insert is smaller than the first element
         return 1;
     } else {
-        int current_lvl = mylist.max_level - 1;
-        t_d_cell *current = mylist.heads[current_lvl]; // temporary cell to browse the list
+        int current_lvl = intList.max_level - 1;
+        t_d_cell *current = intList.heads[current_lvl]; // temporary cell to browse the list
         while (current_lvl > 0 && current != NULL) {
             while (current->next[current_lvl] != NULL &&
                    current->value < val) { // while current cell's value is smaller than the new cell's value
@@ -181,32 +182,6 @@ int isValueInListMultiniveaux(t_d_list mylist, int val) {
                 return 1;
             }
             current_lvl--;
-        }
-        return 0;
-    }
-}
-
-int isValueInListLvl1(t_d_list mylist, int val) {
-    if (mylist.heads[0] == NULL) {
-        return 0;
-    }
-    if (mylist.heads[0]->value == val) { // addHead if the value we want to insert is smaller than the first element
-        return 1;
-    } else {
-        t_d_cell *current; // temporary cell to browse the list
-
-        for (int i = mylist.max_level - 1;
-             i >= 0; i--) { // going from the highest lvl of the new cell to the first level
-            current = mylist.heads[i]; // set current to head
-            if (current != NULL) {
-                while (current->next[i] != NULL &&
-                       current->value < val) { // while current cell's value is smaller than the new cell's value
-                    current = current->next[i]; // set current cell to its successor (on the same line)
-                }
-                if (current->value == val) {
-                    return 1;
-                }
-            }
         }
         return 0;
     }

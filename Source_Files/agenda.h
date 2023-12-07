@@ -26,7 +26,6 @@ typedef struct s_d_rdv {
 typedef struct s_d_contact {
     char *nom;
     t_d_rdv *rdv_head;
-    t_d_rdv *rdv_tail;
     struct s_d_contact **next;
 } t_d_contact;
 
@@ -44,8 +43,8 @@ t_d_ContactList createContactList();
 t_d_contact *createContact(char *, int);
 t_d_contact* insertContact(t_d_ContactList *, char *);
 
-void display_level_Contact_aligned(t_d_ContactList mylist, int lvl);
-void display_all_levels_Contact_aligned(t_d_ContactList mylist);
+void display_level_Contact_aligned(t_d_ContactList contactList, int lvl);
+void display_all_levels_Contact_aligned(t_d_ContactList contactList);
 
 
 int *checkDate(char *strInput);
@@ -62,11 +61,10 @@ int charPlaces(char *name);
 
 void delete_all_RDV(t_d_contact *);
 
-void delete_Contact(t_d_ContactList *, char *);
 t_d_contact **isContactInList(t_d_ContactList, char *);
 t_d_contact *isContactInListLinear(t_d_ContactList, char *);
 
-void searchContact(t_d_ContactList mylist, char * searchContactName);
+void searchContact(t_d_ContactList contactList, char * searchContactName);
 
 void freeAll(t_d_ContactList *);
 

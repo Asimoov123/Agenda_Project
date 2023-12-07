@@ -3,18 +3,18 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-#include "list.h"
-#include "timer.h"
 #include <windows.h>
-#include "files.h"
+#include "Source_Files/list.h"
+#include "Source_Files/timer.h"
+#include "Source_Files/files.h"
+#include "Source_Files/autocompletion.h"
 
 
 void compareExecutionTime(int nbOfSearches) {
-    srand(time(NULL));
 
     t_d_list mylist;
     for (int n = 7; n < 16; n++) {
-        int *levels = malloc(sizeof(int) * (pow(2, n) - 1));
+        int *levels = malloc((long)(pow(2, n) - 1) * sizeof(int));
         for (int i = 0; i < pow(2, n) - 1; i++) {
             levels[i] = 0;
         }
@@ -37,22 +37,20 @@ void compareExecutionTime(int nbOfSearches) {
         startTimer();
         for (int k = 0; k < nbOfSearches; k++) {
             searchedValue = rand() % (int) pow(2, n);
-            isValueInListLineaire(mylist, searchedValue);
+            isValueInListLinear(mylist, searchedValue);
         }
         stopTimer();
         displayTime();
         startTimer();
         for (int k = 0; k < nbOfSearches; k++) {
             searchedValue = rand() % (int) pow(2, n);
-            isValueInListMultiniveaux(mylist, searchedValue);
+            isValueInListMultiLvl(mylist, searchedValue);
         }
         stopTimer();
         displayTime();
         printf("\n");
     }
 }
-
-
 
 void compareExecutionTime_Contact(int nbOfSearches) {
 
@@ -62,7 +60,6 @@ void compareExecutionTime_Contact(int nbOfSearches) {
         return;
     }
 
-    srand(time(NULL));
     t_d_ContactList mylist;
     int lines_extracted, randomLine, num_lines_to_extract, current_line = 0, *lines_to_extract;
     char buffer[128], *searchedName, *all_lines[5003];
@@ -153,176 +150,83 @@ void compareExecutionTime_Contact(int nbOfSearches) {
     }
 
     current_line = 0;
-    while (current_line<5003) {
+    while (current_line < 5003) {
         free(all_lines[current_line]);
         current_line++;
     }
 }
 
 
-// Function to read a key press without waiting for enter
-char getch() {
-    char buf = 0;
-    DWORD mode, NumberOfEventsRead;
-    INPUT_RECORD Event;
-    HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
-    // Get the current console mode
-    GetConsoleMode(hIn, &mode);
-    // Modify the console mode to disable line input and echo input
-    SetConsoleMode(hIn, mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT));
+int main1() {
 
-    // Wait for a key event
-    while (ReadConsoleInput(hIn, &Event, 1, &NumberOfEventsRead)) {
-        if (Event.EventType == KEY_EVENT && Event.Event.KeyEvent.bKeyDown) {
-            // Store the ASCII character of the key pressed
-            buf = Event.Event.KeyEvent.uChar.AsciiChar;
-            break;
-        }
+    char buff[128];
 
-    }
-    // Restore the original console mode
-    SetConsoleMode(hIn, mode);
-    // Return the pressed key
-    return buf;
-}
+//    t_d_list mylist2 = createList(9);
+//    addHead(&mylist2, 8, 4);
+//    addHead(&mylist2, 12, 3);
+//    addHead(&mylist2, 4, 8);
+//    display_all_levels_aligned(mylist2);
+
+//    t_d_list mylist2 = createList(9);
+//    add_Increasing_Order(&mylist2, 8, 4);
+//    add_Increasing_Order(&mylist2, 12, 7);
+//    add_Increasing_Order(&mylist2, 4, 9);
+//    display_all_levels_aligned(mylist2);
 
 
-// Autocomplete function
-char **autocomplete(char input[], t_d_ContactList mylist) {
-    // If list is empty
-    if (mylist.heads[3] == NULL) {
-        return NULL;
+    int n = 5;
+    int *levels = malloc((long)(pow(2, n) - 1) * sizeof(int));
+    for (int i = 0; i < pow(2, n) - 1; i++) {
+        levels[i] = 0;
     }
 
-    int matchCount = 0, i;
-    char *ScannedName = Scan_name(input);
-
-    // Init the matches array
-    char **matches = malloc(1024 * sizeof(char *));
-    for (i = 0; i < 1024; i++) {
-        matches[i] = NULL;
-    }
-
-    t_d_contact *currCell = mylist.heads[3];
-    int currentLvl = 3;
-
-    // Find matching names
-    while (currentLvl >= 0) {
-        while (currCell != NULL &&
-               ((currentLvl == 0) ? strcmp(currCell->nom, ScannedName) :
-                strncmp(currCell->nom, ScannedName, 4 - currentLvl)) < 0) {
-            currCell = currCell->next[currentLvl];
-        }
-        if (currCell != NULL && strncmp(currCell->nom, ScannedName, strlen(ScannedName)) == 0) {
-            currentLvl = 0;
-            while (currCell != NULL && strncmp(currCell->nom, ScannedName, strlen(ScannedName)) == 0) {
-                // Allocate memory for a matched name and store it in the matches array
-                matches[matchCount] = malloc(25 * sizeof(char));
-                strcpy(matches[matchCount++], currCell->nom);
-                currCell = currCell->next[currentLvl];
-            }
-            break;
-        }
-
-        currentLvl--;
-    }
-
-    // If no matches, do nothing and return an empty string
-    if (matchCount == 0) {
-        return NULL;
-    }
-
-    // Return the matches
-    return matches;
-}
-
-// Function to perform autocomplete for user input based on a given contact list
-char *autocompleteResearch(t_d_ContactList mylist) {
-    // Initialize input arrays
-    char input[25], alphabeticalInput[25] = "\0", previousInput[25] = "\0";
-
-    // Allocate memory for the result array
-    char **result = malloc(1024 * sizeof(char *));
-    for (int i = 0; i < 1024; i++) {
-        result[i] = NULL;
-    }
-
-    int i = 0, j = 0, k = 0, c = 0, found = 0;
-
-    // Main loop to read user input until Enter key (ASCII 13) is pressed
-    while ((input[i] = getch()) != 13 && input[i] != 27) {
-        // Check if the input character is an alphabetical character or a space
-        if (('A' <= input[i] && input[i] <= 'Z') || ('a' <= input[i] && input[i] <= 'z') || input[i] == ' ' ||
-            input[i] == '_' || input[i] == '\'') {
-            printf("%c", input[i]);
-            alphabeticalInput[k++] = (char) (int) input[i];
-        }
-
-        // Check if Backspace key (ASCII 8) is pressed and there is input to delete
-        if (input[i] == 8 && alphabeticalInput[0] != '\0') {
-            alphabeticalInput[--k] = '\0';
-            printf("\33[2K\r%s", alphabeticalInput); // Clear the current line and print the modified input
-            input[--i] = '\0';
-        }
-
-        // Check if Tab key (ASCII 9) is pressed and the input meets the minimum length
-        if (input[i] == '\t' && strlen(alphabeticalInput) >= 3) {
-            // Compute autocomplete matches only if it hasn't been done before
-            if (!found || strcmp(previousInput, alphabeticalInput) != 0) {
-                strcpy(previousInput, alphabeticalInput);
-                result = autocomplete(alphabeticalInput, mylist);
-                found = 1;
-            }
-            // If no autocomplete results, skip the rest of this iteration
-            if (result == NULL) {
-                continue;
-            } else {
-                // Display the current autocomplete result
-                if (result[j + 1] == NULL) {
-                    printf("\33[2K\r%s", result[j]);
-                    j = 0;
-                } else {
-                    if (result[j] != NULL) {
-                        printf("\33[2K\r%s", result[j++]);
-                    }
-                }
-            }
-        } else {
-            i++;
+    for (int i = 2; i <= pow(2, n); i *= 2) {
+        for (int j = i - 1; j < pow(2, n) - 1; j += i) {
+            levels[j]++;
         }
     }
-    if (input[i] == 27) {
-        return NULL;
+
+    t_d_list mylist1 = createList(n);
+
+    for (int i = 0; i < pow(2, n) - 1; i++) {
+        add_Increasing_Order(&mylist1, i + 1, levels[i]);
     }
 
-    // Null-terminate the input string
-    input[i] = '\0';
+    printf("%-2d \n", n);
+    display_all_levels_aligned(mylist1);
 
-    // If no autocomplete results check if the input is in the contact list
-    if (!result || result[j] == NULL) {
-        // If the contact is not found, return the input
-        return Scan_name(alphabeticalInput);
-    }
-    // If there are autocomplete results, return the current result
-    while (result[c + 1]) c++;
-    j = (j == 0) ? c : j - 1;
-    return result[j];
+    compareExecutionTime(1000);
+
+    fgets(buff, 128, stdin);
+
+    return 0;
 }
 
 
 int main() {
+    srand(time(NULL));
     t_d_ContactList mylist = createContactList();
     char buff[128];
     int run = 1;
     char *result;
 
-//    compareExecutionTime_Contact(100000);
+    compareExecutionTime_Contact(100000);
 
     insertFromFile(mylist, "CSV_Files/names1000_1.csv");
     insertFromFile(mylist, "CSV_Files/names1000_2.csv");
     insertFromFile(mylist, "CSV_Files/names1000_3.csv");
     insertFromFile(mylist, "CSV_Files/names1000_4.csv");
     insertFromFile(mylist, "CSV_Files/names1000_5.csv");
+
+
+//    insertContact(&mylist, Scan_name("DosSantos Thomas"));
+//    insertContact(&mylist, Scan_name("Bracquemart Theo"));
+//    insertContact(&mylist, Scan_name("Prevot ROmain"));
+//    insertContact(&mylist, Scan_name("Pression blonde"));
+//    insertContact(&mylist, Scan_name("Precis bam"));
+//    display_all_levels_Contact_aligned(mylist);
+
+
 
 
     while (run) {
@@ -398,7 +302,12 @@ int main() {
                 printf("1. Delete an Appointment\n2. Delete All Appointments\n> ");
                 if (fgets(buff, 128, stdin) != NULL) {
                     if (strcmp(buff, "1\n") == 0) {
-                        printf("Soon...\n");
+                        if (temp != NULL) {
+                            delete_all_RDV(temp);
+                            printf("[-] Appointments successfully deleted\n");
+                        } else {
+                            printf("\nContact not found\n");
+                        }
                     }
                     if (strcmp(buff, "2\n") == 0) {
                         if (temp != NULL) {

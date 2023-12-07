@@ -58,14 +58,14 @@ char *Scan_name(char *strInput) {
 
 // This function creates and returns a new contact list.
 t_d_ContactList createContactList() {
-    t_d_ContactList mylist;
-    mylist.max_level = 4;
-    mylist.heads = (t_d_contact **) malloc(sizeof(t_d_contact *) * mylist.max_level);
+    t_d_ContactList contactList;
+    contactList.max_level = 4;
+    contactList.heads = (t_d_contact **) malloc(sizeof(t_d_contact *) * contactList.max_level);
     for (int i = 0; i < 4; i++) {
-        mylist.heads[i] = (t_d_contact *) malloc(sizeof(t_d_contact));
-        mylist.heads[i] = NULL;
+        contactList.heads[i] = (t_d_contact *) malloc(sizeof(t_d_contact));
+        contactList.heads[i] = NULL;
     }
-    return mylist;
+    return contactList;
 }
 
 /* This function creates a new contact with a given name and level.
@@ -79,21 +79,20 @@ t_d_contact *createContact(char *name, int lvl) {
         contact->next[i] = NULL;
     }
     contact->rdv_head = NULL;
-    contact->rdv_tail = NULL;
 
     return contact;
 }
 
 // This function creates and inserts alphabetically a new contact with a given name.
-t_d_contact * insertContact(t_d_ContactList *mylist, char *newContactName) {
-    t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
+t_d_contact * insertContact(t_d_ContactList *contactList, char *newContactName) {
+    t_d_contact *prevCell = NULL, *currCell = contactList->heads[3];
     int currentLvl = 3, previousLvl = 3;
 
     // If the new contact is to be inserted at the beginning of the list
     if (currCell == NULL) {
         t_d_contact *newContact = createContact(newContactName, 3); // First element is always at max level
         for (int c = 0; c < 4; c++) {
-            mylist->heads[c] = newContact;
+            contactList->heads[c] = newContact;
         }
         return newContact;
     }
@@ -125,7 +124,7 @@ t_d_contact * insertContact(t_d_ContactList *mylist, char *newContactName) {
         t_d_contact *temp;
         for (int i = 0; i < currentLvl + 1; i++) {
             temp = prevCell;
-            while (temp->next[i] != NULL && i < mylist->max_level) {
+            while (temp->next[i] != NULL && i < contactList->max_level) {
                 temp = temp->next[i];
             }
             temp->next[i] = newContact;
@@ -144,13 +143,13 @@ t_d_contact * insertContact(t_d_ContactList *mylist, char *newContactName) {
         }
         if (prevCell == NULL) {
             for (int c = 0; c < 4; c++) {
-                mylist->heads[c] = newContact;
+                contactList->heads[c] = newContact;
             }
         } else {
             t_d_contact *temp;
             for (int i = 0; i <= previousLvl; i++) {
                 temp = prevCell;
-                while (temp->next[i] != currCell && i < mylist->max_level) {
+                while (temp->next[i] != currCell && i < contactList->max_level) {
                     temp = temp->next[i];
                 }
                 temp->next[i] = newContact;
@@ -172,57 +171,13 @@ void delete_all_RDV(t_d_contact *contact) {
 }
 
 
-
-//void delete_Contact(t_d_ContactList *mylist, char *delContactName) {
-//    t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
-//    int currentLvl = 3, previousLvl = 3, found = 0;
-//
-//
-//    if (strcmp(currCell->nom, delContactName) == 0) {
-//        for (int i = 0; i < 4; i++) {
-//            mylist->heads[i] = currCell->next[i];
-//        }
-//    } else {
-//        // Locate contact to delete
-//        while (currentLvl >= 0) {
-//            while (currCell != NULL && strncmp(currCell->nom, delContactName, 4 - currentLvl) < 0) {
-//                prevCell = currCell;
-//                currCell = currCell->next[currentLvl];
-//                previousLvl = currentLvl;
-//            }
-//            if (currCell == NULL || strcmp(currCell->nom, delContactName) > 0) {
-//                printf("Contact not found.");
-//                return;
-//            } else if (strcmp(currCell->nom, delContactName) == 0) {
-//                found = 1;
-//                break;
-//            }
-//            currentLvl--;
-//        }
-//
-//        t_d_contact *temp;
-//        for (int i = 0; i <= previousLvl; i++) {
-//            temp = prevCell;
-//            while (temp->next[i] != currCell) {
-//                temp = temp->next[i];
-//            }
-//            temp->next[i] = currCell->next[i];
-//        }
-//    }
-//
-//    delete_all_RDV(currCell);
-//    free(currCell);
-//    currCell = NULL;
-//    printf("Contact successfully deleted.");
-//}
-
-t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
+t_d_contact **isContactInList(t_d_ContactList contactList, char *searchContactName) {
     // If list is empty
-    if (mylist.heads[3] == NULL || searchContactName == NULL) {
+    if (contactList.heads[3] == NULL || searchContactName == NULL) {
         return NULL;
     }
 
-    t_d_contact *prevCell = NULL, *currCell = mylist.heads[3];
+    t_d_contact *prevCell = NULL, *currCell = contactList.heads[3];
     t_d_contact **res = malloc(2 * sizeof(t_d_contact *));
 
     if (res == NULL) {
@@ -251,14 +206,14 @@ t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
     }
     return res;
 }
-t_d_contact *isContactInListLinear(t_d_ContactList mylist, char *searchContactName) {
+t_d_contact *isContactInListLinear(t_d_ContactList contactList, char *searchContactName) {
 
     // If list is empty
-    if (mylist.heads[0] == NULL || searchContactName == NULL) {
+    if (contactList.heads[0] == NULL || searchContactName == NULL) {
         return NULL;
     }
 
-    t_d_contact *currCell = mylist.heads[0];
+    t_d_contact *currCell = contactList.heads[0];
 
     // Locate contact in list
     while (currCell != NULL) {
@@ -269,17 +224,11 @@ t_d_contact *isContactInListLinear(t_d_ContactList mylist, char *searchContactNa
         }
         currCell = currCell->next[0];
     }
+    return NULL;
 }
 
-void searchContact(t_d_ContactList mylist, char *searchContactName) {
-    if (isContactInList(mylist, searchContactName))
-        printf("\nContact Found\n");
-    else
-        printf("\nContact Not Found\n");
-}
-
-void searchContactLinear(t_d_ContactList mylist, char *searchContactName) {
-    if (isContactInListLinear(mylist, searchContactName))
+void searchContact(t_d_ContactList contactList, char *searchContactName) {
+    if (isContactInList(contactList, searchContactName))
         printf("\nContact Found\n");
     else
         printf("\nContact Not Found\n");
@@ -294,7 +243,6 @@ int *checkDate(char *strInput) {
     while (strToken != NULL && i < 3) {
         for (int k = 0; k < strlen(strToken); k++) {
             if (!isdigit(strToken[k])) {
-                printf("!digit\n");
                 free(strInput);
                 strInput = NULL;
                 free(intDate);
@@ -321,7 +269,7 @@ int *checkDate(char *strInput) {
             }
         }
     }
-    printf("NotvalidDate\n");
+    printf("Not valid Date\n");
     free(strInput);
     strInput = NULL;
     free(intDate);
@@ -463,7 +411,6 @@ void insert_Rendez_Vous(t_d_contact *contact, char *object, const int *intDate, 
     // Rajout dans la liste par ordre croissant
     if (temp == NULL) {
         contact->rdv_head = rdv;
-        contact->rdv_tail = rdv;
         return;
     }
     if (rdv->date.annee < temp->date.annee ||
@@ -531,8 +478,8 @@ void display_Rendez_Vous(t_d_rdv rdv) {
 }
 
 
-void display_all_rendez_vous(t_d_ContactList mylist, char *rdvContactName) {
-    t_d_contact **isContact = isContactInList(mylist, rdvContactName);
+void display_all_rendez_vous(t_d_ContactList contactList, char *rdvContactName) {
+    t_d_contact **isContact = isContactInList(contactList, rdvContactName);
     if (isContact == NULL) {
         printf("Contact not found\n");
         return;
@@ -552,10 +499,10 @@ int charPlaces(char *name) {
 }
 
 
-void display_level_Contact_aligned(t_d_ContactList mylist, int lvl) {
+void display_level_Contact_aligned(t_d_ContactList contactList, int lvl) {
     printf("[list head_%d @-]--", lvl);
-    t_d_contact *current0Cell = mylist.heads[0]; // temporary cell
-    t_d_contact *currentLvlCell = mylist.heads[lvl]; // temporary cell
+    t_d_contact *current0Cell = contactList.heads[0]; // temporary cell
+    t_d_contact *currentLvlCell = contactList.heads[lvl]; // temporary cell
 
     while (current0Cell != NULL) {
         if (current0Cell !=
@@ -575,18 +522,18 @@ void display_level_Contact_aligned(t_d_ContactList mylist, int lvl) {
 }
 
 
-void display_all_levels_Contact_aligned(t_d_ContactList mylist) {
+void display_all_levels_Contact_aligned(t_d_ContactList contactList) {
     for (int i = 0; i < 4; i++) {
-        display_level_Contact_aligned(mylist, i);
+        display_level_Contact_aligned(contactList, i);
     }
 }
 
 
-void freeAll(t_d_ContactList *mylist) {
+void freeAll(t_d_ContactList *contactList) {
     t_d_contact *temp;
-    while (mylist->heads[0] != NULL) {
-        temp = mylist->heads[0];
-        mylist->heads[0] = mylist->heads[0]->next[0];
+    while (contactList->heads[0] != NULL) {
+        temp = contactList->heads[0];
+        contactList->heads[0] = contactList->heads[0]->next[0];
         delete_all_RDV(temp);
         free(temp->rdv_head);
         temp->rdv_head = NULL;

@@ -55,35 +55,41 @@ build CMakeFiles/Agenda_Project.dir/main.c.obj: C_COMPILER__Agenda_Project_unsca
   OBJECT_DIR = CMakeFiles\Agenda_Project.dir
   OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir
 
-build CMakeFiles/Agenda_Project.dir/timer.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/timer.c || cmake_object_order_depends_target_Agenda_Project
-  DEP_FILE = CMakeFiles\Agenda_Project.dir\timer.c.obj.d
+build CMakeFiles/Agenda_Project.dir/Source_Files/timer.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/Source_Files/timer.c || cmake_object_order_depends_target_Agenda_Project
+  DEP_FILE = CMakeFiles\Agenda_Project.dir\Source_Files\timer.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\Agenda_Project.dir
-  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir
+  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir\Source_Files
 
-build CMakeFiles/Agenda_Project.dir/list.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/list.c || cmake_object_order_depends_target_Agenda_Project
-  DEP_FILE = CMakeFiles\Agenda_Project.dir\list.c.obj.d
+build CMakeFiles/Agenda_Project.dir/Source_Files/list.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/Source_Files/list.c || cmake_object_order_depends_target_Agenda_Project
+  DEP_FILE = CMakeFiles\Agenda_Project.dir\Source_Files\list.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\Agenda_Project.dir
-  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir
+  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir\Source_Files
 
-build CMakeFiles/Agenda_Project.dir/cell.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/cell.c || cmake_object_order_depends_target_Agenda_Project
-  DEP_FILE = CMakeFiles\Agenda_Project.dir\cell.c.obj.d
+build CMakeFiles/Agenda_Project.dir/Source_Files/cell.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/Source_Files/cell.c || cmake_object_order_depends_target_Agenda_Project
+  DEP_FILE = CMakeFiles\Agenda_Project.dir\Source_Files\cell.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\Agenda_Project.dir
-  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir
+  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir\Source_Files
 
-build CMakeFiles/Agenda_Project.dir/agenda.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/agenda.c || cmake_object_order_depends_target_Agenda_Project
-  DEP_FILE = CMakeFiles\Agenda_Project.dir\agenda.c.obj.d
+build CMakeFiles/Agenda_Project.dir/Source_Files/agenda.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/Source_Files/agenda.c || cmake_object_order_depends_target_Agenda_Project
+  DEP_FILE = CMakeFiles\Agenda_Project.dir\Source_Files\agenda.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\Agenda_Project.dir
-  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir
+  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir\Source_Files
 
-build CMakeFiles/Agenda_Project.dir/files.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/files.c || cmake_object_order_depends_target_Agenda_Project
-  DEP_FILE = CMakeFiles\Agenda_Project.dir\files.c.obj.d
+build CMakeFiles/Agenda_Project.dir/Source_Files/files.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/Source_Files/files.c || cmake_object_order_depends_target_Agenda_Project
+  DEP_FILE = CMakeFiles\Agenda_Project.dir\Source_Files\files.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\Agenda_Project.dir
-  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir
+  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir\Source_Files
+
+build CMakeFiles/Agenda_Project.dir/Source_Files/autocompletion.c.obj: C_COMPILER__Agenda_Project_unscanned_Debug C$:/Users/romai/CLionProjects/Agenda_Project/Source_Files/autocompletion.c || cmake_object_order_depends_target_Agenda_Project
+  DEP_FILE = CMakeFiles\Agenda_Project.dir\Source_Files\autocompletion.c.obj.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\Agenda_Project.dir
+  OBJECT_FILE_DIR = CMakeFiles\Agenda_Project.dir\Source_Files
 
 
 # =============================================================================
@@ -93,7 +99,7 @@ build CMakeFiles/Agenda_Project.dir/files.c.obj: C_COMPILER__Agenda_Project_unsc
 #############################################
 # Link the executable Agenda_Project.exe
 
-build Agenda_Project.exe: C_EXECUTABLE_LINKER__Agenda_Project_Debug CMakeFiles/Agenda_Project.dir/main.c.obj CMakeFiles/Agenda_Project.dir/timer.c.obj CMakeFiles/Agenda_Project.dir/list.c.obj CMakeFiles/Agenda_Project.dir/cell.c.obj CMakeFiles/Agenda_Project.dir/agenda.c.obj CMakeFiles/Agenda_Project.dir/files.c.obj
+build Agenda_Project.exe: C_EXECUTABLE_LINKER__Agenda_Project_Debug CMakeFiles/Agenda_Project.dir/main.c.obj CMakeFiles/Agenda_Project.dir/Source_Files/timer.c.obj CMakeFiles/Agenda_Project.dir/Source_Files/list.c.obj CMakeFiles/Agenda_Project.dir/Source_Files/cell.c.obj CMakeFiles/Agenda_Project.dir/Source_Files/agenda.c.obj CMakeFiles/Agenda_Project.dir/Source_Files/files.c.obj CMakeFiles/Agenda_Project.dir/Source_Files/autocompletion.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\Agenda_Project.dir

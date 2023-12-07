@@ -3,10 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "timer.h"
 
 
-char *saveToFile(t_d_ContactList mylist, char *filePath) {
+char *saveToFile(t_d_ContactList contactList, char *filePath) {
     FILE *fpt = NULL;
     if (filePath == NULL) {
         filePath = malloc(512 * sizeof(char));
@@ -23,7 +22,7 @@ char *saveToFile(t_d_ContactList mylist, char *filePath) {
         return NULL;
     }
 
-    t_d_contact *temp = mylist.heads[0];
+    t_d_contact *temp = contactList.heads[0];
     while (temp != NULL) {
         fprintf(fpt, "%s;", temp->nom);
         t_d_rdv *tempRDV = temp->rdv_head;
@@ -58,9 +57,8 @@ void loadFromFile(t_d_ContactList* contactList, char* filePath) {
             printf("[+] %s\n", name);
 
         }
-        startTimer();
         temp = insertContact(contactList, name);
-        stopTimer();
+
         while (strToken != NULL) {
             if (strcmp(strToken, "{") == 0) {
                 strToken = strtok(NULL, ";");
@@ -86,7 +84,7 @@ void loadFromFile(t_d_ContactList* contactList, char* filePath) {
 }
 
 // Function to insert contacts from a csv file
-void insertFromFile(t_d_ContactList mylist, char *filePath) {
+void insertFromFile(t_d_ContactList contactList, char *filePath) {
     // Open the file for reading
     FILE *fp = fopen(filePath, "r");
 
@@ -103,7 +101,7 @@ void insertFromFile(t_d_ContactList mylist, char *filePath) {
 
         // Duplicate the buffer using strdup to avoid modifying the original string
         char *scannedName = Scan_name(strdup(buffer));
-        insertContact(&mylist, scannedName); // Insert the modified contact name into the contact list
+        insertContact(&contactList, scannedName); // Insert the modified contact name into the contact list
         // Cleaning Memory
         free(scannedName);
         scannedName = NULL; // Set the pointer to NULL for safety

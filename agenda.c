@@ -56,6 +56,18 @@ char *Scan_name(char *strInput) {
     return full_name;
 }
 
+// This function creates and returns a new contact list.
+t_d_ContactList createContactList() {
+    t_d_ContactList mylist;
+    mylist.max_level = 4;
+    mylist.heads = (t_d_contact **) malloc(sizeof(t_d_contact *) * mylist.max_level);
+    for (int i = 0; i < 4; i++) {
+        mylist.heads[i] = (t_d_contact *) malloc(sizeof(t_d_contact));
+        mylist.heads[i] = NULL;
+    }
+    return mylist;
+}
+
 /* This function creates a new contact with a given name and level.
 It returns a pointer to the newly created contact. */
 t_d_contact *createContact(char *name, int lvl) {
@@ -72,20 +84,6 @@ t_d_contact *createContact(char *name, int lvl) {
     return contact;
 }
 
-
-// This function creates and returns a new contact list.
-t_d_ContactList createContactList() {
-    t_d_ContactList mylist;
-    mylist.max_level = 4;
-    mylist.heads = (t_d_contact **) malloc(sizeof(t_d_contact *) * mylist.max_level);
-    for (int i = 0; i < 4; i++) {
-        mylist.heads[i] = (t_d_contact *) malloc(sizeof(t_d_contact));
-        mylist.heads[i] = NULL;
-    }
-    return mylist;
-}
-
-
 // This function creates and inserts alphabetically a new contact with a given name.
 t_d_contact * insertContact(t_d_ContactList *mylist, char *newContactName) {
     t_d_contact *prevCell = NULL, *currCell = mylist->heads[3];
@@ -100,7 +98,6 @@ t_d_contact * insertContact(t_d_ContactList *mylist, char *newContactName) {
         return newContact;
     }
 
-
     // Locate insertion point for new contact
     while (currentLvl >= 0) {
         while (currCell != NULL &&
@@ -113,7 +110,7 @@ t_d_contact * insertContact(t_d_ContactList *mylist, char *newContactName) {
         if (currCell == NULL || strncmp(currCell->nom, newContactName, 4 - currentLvl) > 0) {
             break;
         } else if (strcmp(currCell->nom, newContactName) == 0) {
-            printf("Contact already registered.\n");
+            // printf("Contact already registered.\n");
             free(newContactName);
             newContactName = NULL;
             return currCell;
@@ -161,6 +158,7 @@ t_d_contact * insertContact(t_d_ContactList *mylist, char *newContactName) {
         }
         return newContact;
     }
+    return NULL;
 }
 
 
@@ -235,28 +233,56 @@ t_d_contact **isContactInList(t_d_ContactList mylist, char *searchContactName) {
 
     // Locate contact in list
     while (currentLvl >= 0) {
-        while (currCell != NULL && strncmp(currCell->nom, searchContactName, 4 - currentLvl) < 0) {
+        while (currCell != NULL && ((currentLvl == 0) ? strcmp(currCell->nom, searchContactName) :
+                                    strncmp(currCell->nom, searchContactName, 4 - currentLvl)) < 0) {
             prevCell = currCell;
             currCell = currCell->next[currentLvl];
         }
         if (currCell == NULL || strcmp(currCell->nom, searchContactName) > 0) {
             free(res);
             res = NULL;
+            return NULL;
         } else if (strcmp(currCell->nom, searchContactName) == 0) {
             res[0] = prevCell;
             res[1] = currCell;
+            return res;
         }
         currentLvl--;
     }
     return res;
 }
+t_d_contact *isContactInListLinear(t_d_ContactList mylist, char *searchContactName) {
 
+    // If list is empty
+    if (mylist.heads[0] == NULL || searchContactName == NULL) {
+        return NULL;
+    }
+
+    t_d_contact *currCell = mylist.heads[0];
+
+    // Locate contact in list
+    while (currCell != NULL) {
+        if (currCell == NULL || strcmp(currCell->nom, searchContactName) > 0) {
+            return NULL;
+        } else if (strcmp(currCell->nom, searchContactName) == 0) {
+            return currCell;
+        }
+        currCell = currCell->next[0];
+    }
+}
 
 void searchContact(t_d_ContactList mylist, char *searchContactName) {
     if (isContactInList(mylist, searchContactName))
-        printf("Contact Found\n");
+        printf("\nContact Found\n");
     else
-        printf("Contact Not Found\n");
+        printf("\nContact Not Found\n");
+}
+
+void searchContactLinear(t_d_ContactList mylist, char *searchContactName) {
+    if (isContactInListLinear(mylist, searchContactName))
+        printf("\nContact Found\n");
+    else
+        printf("\nContact Not Found\n");
 }
 
 

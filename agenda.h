@@ -1,10 +1,6 @@
 #ifndef AGENDA_PROJECT_AGENDA_H
 #define AGENDA_PROJECT_AGENDA_H
 
-#include "cell.h"
-#include "list.h"
-
-
 
 typedef struct date {
     int jour;
@@ -42,43 +38,35 @@ typedef struct s_d_ContactList { //Liste des contacts
 
 
 char *scanString(void);
-
 char *Scan_name(char*);
 
-
-t_d_contact *createContact(char *, int);
-
-void display_level_Contact_aligned(t_d_ContactList mylist, int lvl);
-
-void display_all_levels_Contact_aligned(t_d_ContactList mylist);
-
-int charPlaces(char *name);
-
 t_d_ContactList createContactList();
-
-
+t_d_contact *createContact(char *, int);
 t_d_contact* insertContact(t_d_ContactList *, char *);
 
-int *checkDate(char *strInput);
+void display_level_Contact_aligned(t_d_ContactList mylist, int lvl);
+void display_all_levels_Contact_aligned(t_d_ContactList mylist);
 
+
+int *checkDate(char *strInput);
 int *checkTime(char *);
 
 void load_Rendez_Vous(t_d_contact*, char*, char*, char*, char*);
 void create_Rendez_Vous(t_d_contact *);
 void insert_Rendez_Vous(t_d_contact *, char*, const int*, const int*, const int*);
 void display_Rendez_Vous(t_d_rdv);
-
 void display_all_rendez_vous(t_d_ContactList, char *);
 
-void display_all_appointment(t_d_contact);
+int charPlaces(char *name);
 
 
 void delete_all_RDV(t_d_contact *);
 
 void delete_Contact(t_d_ContactList *, char *);
 t_d_contact **isContactInList(t_d_ContactList, char *);
+t_d_contact *isContactInListLinear(t_d_ContactList, char *);
+
 void searchContact(t_d_ContactList mylist, char * searchContactName);
-//void delete_Contact(t_d_ContactList *, t_d_contact *);
 
 void freeAll(t_d_ContactList *);
 

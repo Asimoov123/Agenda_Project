@@ -1,0 +1,32 @@
+# Ignore build artifacts and directories
+cmake_build_debug/
+CMakeFiles/
+Testing/
+.ninja_deps
+.ninja_log
+Agenda_Project.exe
+cmake_install.cmake
+CMakeCache.txt
+
+# Ignore IDE files
+.idea/
+*.suo
+*.user
+*.sdf
+*.opensdf
+*.sln.docstates
+
+# Ignore compiled binaries and libraries
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+
+# Ignore temporary files
+*.swp
+*~
+
+# Ignore system-specific files
+Thumbs.db
+.DS_Store

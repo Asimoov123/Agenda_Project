@@ -1,7 +1,7 @@
 <p align="center"><a href="https://www.efrei.fr/"><img src="https://www.efrei.fr/wp-content/uploads/2022/01/LOGO_EFREI-PRINT_EFREI-WEB.png" alt="Logo de l'EFREI" width="60%" /></a></p>
 
 <h1 align="center">Agenda_Project</h1>
-<p align="center">TI301 – Algorithmique et structures de données 2 - Projet Gestion d’un agenda - Projet Efrei L2 ASSD2 2023-2024<br>Réalisé par BRAQUEMART Théo, DOS SANTOS Thomas et PREVOT Romain</p>
+<p align="center">TI301 – Algorithmique et structures de données 2 - Projet Gestion d’un agenda - Projet Efrei L2 ASSD2 2023-2024<br>Réalisé par BRACQUEMART Théo, DOS SANTOS Thomas et PRÉVOT Romain</p>
 
 
 # Introduction

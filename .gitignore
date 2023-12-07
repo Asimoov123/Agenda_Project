@@ -1,10 +1,12 @@
 # Ignore build artifacts and directories
 cmake_build_debug/
+.cmake/
 CMakeFiles/
 Testing/
 .ninja_deps
 .ninja_log
 Agenda_Project.exe
+build.ninja
 cmake_install.cmake
 CMakeCache.txt
 

@@ -143,29 +143,47 @@ int main() {
 
             } else if (strcmp(buff, "5\n") == 0) {
                 printf("Please enter the first and last name of the contact:\n");
-                char *contact_name = Scan_name(scanString());
-                t_d_contact *temp = isContactInList(mylist, contact_name)[1];
-                printf("1. Delete an Appointment\n2. Delete All Appointments\n> ");
-                if (fgets(buff, 128, stdin) != NULL) {
-                    if (strcmp(buff, "1\n") == 0) {
-                        if (temp != NULL) {
-                            delete_all_RDV(temp);
-                            printf("[-] Appointments successfully deleted\n");
-                        } else {
-                            printf("\nContact not found\n");
+                result = autocompleteResearch(mylist);
+                if (result) {
+                    t_d_contact **temp = isContactInList(mylist, result);
+                    printf("1. Delete an Appointment\n2. Delete All Appointments\n> ");
+                    if (fgets(buff, 128, stdin) != NULL && temp != NULL) {
+                        if (strcmp(buff, "1\n") == 0) {
+                            if (temp != NULL) {
+                                display_all_rendez_vous(mylist, temp[1]->nom);
+                                printf("Number of the appointment to delete : ");
+                                if (fgets(buff, 2, stdin) != NULL) {
+                                    int isStrdigit = 1;
+                                    for (int i = 0; i < strlen(buff); i++) {
+                                        if (!isdigit(buff[i])) {
+                                            isStrdigit = 0;
+                                        }
+                                        if (isStrdigit) {
+                                            int j = strtol(buff, NULL, 2);
+                                            delete_RDV(temp[1], j);
+                                            printf("[-] Appointments successfully deleted\n");
+                                        }
+                                    }
+                                } else {
+                                    printf("Appointment not found\n");
+                                }
+                            } else {
+                                printf("\nContact not found\n");
+                            }
+                        }
+                        if (strcmp(buff, "2\n") == 0) {
+                            if (temp != NULL) {
+                                delete_all_RDV(temp);
+                                printf("[-] All appointments successfully deleted\n");
+                            } else {
+                                printf("\nContact not found\n");
+                            }
                         }
                     }
-                    if (strcmp(buff, "2\n") == 0) {
-                        if (temp != NULL) {
-                            delete_all_RDV(temp);
-                            printf("[-] All appointments successfully deleted\n");
-                        } else {
-                            printf("\nContact not found\n");
-                        }
-                    }
+                    free(result);
+                    result = NULL;
                 }
-                free(contact_name);
-                contact_name = NULL;
+
                 fgets(buff, 128, stdin);
                 printf("\033c");
 

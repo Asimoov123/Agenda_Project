@@ -178,8 +178,8 @@ void compareExecutionTime_Contact(int nbOfSearches) {
 // M.A. BENALLAL - "GNUPLOT, comment tracer une courbe en C" : https://www.youtube.com/watch?v=iWlYEScSgNc
 void plotCurves(){
 
-    char *gnuname = "'C:/Users/romai/CLionProjects/Agenda_Project/Complexity/plotingFile.txt'";
-    char *gnupath = "'C:/Program Files/gnuplot/bin/wgnuplot'";
+    char *gnuname = "C:/Users/romai/CLionProjects/Agenda_Project/Complexity/plotingFile.txt";
+    char *gnupath = "C:/Program Files/gnuplot/bin/wgnuplot";
     char command[500];
 
     char buff[128];

@@ -160,6 +160,25 @@ t_d_contact * insertContact(t_d_ContactList *contactList, char *newContactName) 
     return NULL;
 }
 
+void delete_RDV(t_d_contact *contact, int RDVnumber){
+    t_d_rdv *prev, *temp;
+    temp = contact->rdv_head;
+    prev = temp;
+    int i = 0;
+    while(temp != NULL && i < RDVnumber){
+        prev = temp;
+        temp = temp->next;
+        i++;
+    }
+    if (temp == NULL){
+        printf("Appointment not found\n");
+        return;
+    }
+    prev->next = temp->next;
+    free(temp);
+    temp = NULL;
+}
+
 
 void delete_all_RDV(t_d_contact *contact) {
     t_d_rdv *temp;
@@ -488,7 +507,9 @@ void display_all_rendez_vous(t_d_ContactList contactList, char *rdvContactName) 
     t_d_rdv *rdv_cur;
     rdv_cur = contact->rdv_head;
     printf("%s's appointments :\n", contact->nom);
+    int i = 0;
     while (rdv_cur != NULL) {
+        printf("Appointment n°%d\n", i++);
         display_Rendez_Vous(*rdv_cur);
         rdv_cur = rdv_cur->next;
     }

@@ -58,7 +58,7 @@ void display_all_rendez_vous(t_d_ContactList, char *);
 
 int charPlaces(char *name);
 
-
+void delete_RDV(t_d_contact *, int);
 void delete_all_RDV(t_d_contact *);
 
 t_d_contact **isContactInList(t_d_ContactList, char *);

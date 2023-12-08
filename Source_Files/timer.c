@@ -39,3 +39,18 @@ char *getTimeAsString() {
     // return the buffer
     return buffer;
 }
+
+// return a string with the time in seconds and milliseconds
+char *getTimeAsStringAlt() {
+    // return a string with the time in seconds and milliseconds
+    // format : integers, with 3 digits, fill with 0
+    // example : 001,123
+
+    // use sprintf to write the string in a dynamically allocated buffer
+    char *buffer = (char *) malloc(10 * sizeof(char));
+    // use sprintf to write the string in a dynamically allocated buffer
+    sprintf(buffer, "%03d,%03d", (int) (_timer._msecs) / 1000, (int) (_timer._msecs) % 1000);
+
+    // return the buffer
+    return buffer;
+}

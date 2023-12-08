@@ -1,5 +1,5 @@
 #include "cell.h"
-#include <stdlib.h>
+#include <malloc.h>
 
 
 t_d_cell *createCell(int val, int lvl) {

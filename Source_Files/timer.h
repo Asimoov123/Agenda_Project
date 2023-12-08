@@ -45,4 +45,11 @@ void displayTime();
  */
 char *getTimeAsString();
 
+/**
+ * @brief return a string with the time in seconds
+ * @param none
+ * @return a string with the time in seconds
+ */
+char *getTimeAsStringAlt();
+
 #endif //AGENDA_PROJECT_TIMER_H

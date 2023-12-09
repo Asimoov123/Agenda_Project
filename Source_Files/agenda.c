@@ -84,7 +84,7 @@ t_d_contact *createContact(char *name, int lvl) {
 }
 
 // This function creates and inserts alphabetically a new contact with a given name.
-t_d_contact * insertContact(t_d_ContactList *contactList, char *newContactName) {
+t_d_contact *insertContact(t_d_ContactList *contactList, char *newContactName) {
     t_d_contact *prevCell = NULL, *currCell = contactList->heads[3];
     int currentLvl = 3, previousLvl = 3;
 
@@ -160,34 +160,7 @@ t_d_contact * insertContact(t_d_ContactList *contactList, char *newContactName) 
     return NULL;
 }
 
-void delete_RDV(t_d_contact *contact, int RDVnumber){
-    t_d_rdv *prev, *temp;
-    temp = contact->rdv_head;
-    prev = temp;
-    int i = 0;
-    while(temp != NULL && i < RDVnumber){
-        prev = temp;
-        temp = temp->next;
-        i++;
-    }
-    if (temp == NULL){
-        printf("Appointment not found\n");
-        return;
-    }
-    prev->next = temp->next;
-    free(temp);
-    temp = NULL;
-}
 
-
-void delete_all_RDV(t_d_contact *contact) {
-    t_d_rdv *temp;
-    while (contact->rdv_head != NULL) {
-        temp = contact->rdv_head;
-        contact->rdv_head = contact->rdv_head->next;
-        free(temp);
-    }
-}
 
 
 t_d_contact **isContactInList(t_d_ContactList contactList, char *searchContactName) {
@@ -225,6 +198,7 @@ t_d_contact **isContactInList(t_d_ContactList contactList, char *searchContactNa
     }
     return res;
 }
+
 t_d_contact *isContactInListLinear(t_d_ContactList contactList, char *searchContactName) {
 
     // If list is empty
@@ -407,85 +381,98 @@ void create_Rendez_Vous(t_d_contact *contact) {
 }
 
 
+int compareRDVDates(t_d_rdv *RDV1, t_d_rdv *RDV2) {
+    if (RDV1->date.annee != RDV2->date.annee) {
+        if (RDV1->date.annee < RDV2->date.annee) return -1;
+        else if (RDV1->date.annee > RDV2->date.annee) return 1;
+    } else if (RDV1->date.mois != RDV2->date.mois) {
+        if (RDV1->date.mois < RDV2->date.mois) return -1;
+        else if (RDV1->date.mois > RDV2->date.mois) return 1;
+    } else if (RDV1->date.jour != RDV2->date.jour) {
+        if (RDV1->date.jour < RDV2->date.jour) return -1;
+        else if (RDV1->date.jour > RDV2->date.jour) return 1;
+    } else if (RDV1->horaire.heure != RDV2->horaire.heure) {
+        if (RDV1->horaire.heure < RDV2->horaire.heure) return -1;
+        else if (RDV1->horaire.heure > RDV2->horaire.heure) return 1;
+    } else if (RDV1->horaire.minute != RDV2->horaire.minute) {
+        if (RDV1->horaire.minute < RDV2->horaire.minute) return -1;
+        else if (RDV1->horaire.minute > RDV2->horaire.minute) return 1;
+    }
+    return 0;
+}
+
+
 void insert_Rendez_Vous(t_d_contact *contact, char *object, const int *intDate, const int *intTime, const int *intDuration) {
-    t_d_rdv *rdv = malloc(sizeof(t_d_rdv));
-    rdv->next = NULL;
-    t_d_rdv *temp;
-    t_d_rdv *prev;
+    t_d_rdv *newRdv = malloc(sizeof(t_d_rdv));
+    newRdv->next = NULL;
+    t_d_rdv *temp, *prev;
     temp = contact->rdv_head;
-    rdv->objet = object;
+
+    newRdv->objet = object;
+
+    newRdv->date.jour = intDate[0];
+    newRdv->date.mois = intDate[1];
+    newRdv->date.annee = intDate[2];
+
+    newRdv->horaire.heure = intTime[0];
+    newRdv->horaire.minute = intTime[1];
+
+    newRdv->duree.heure = intDuration[0];
+    newRdv->duree.minute = intDuration[1];
 
 
-    rdv->date.jour = intDate[0];
-    rdv->date.mois = intDate[1];
-    rdv->date.annee = intDate[2];
+    // Add to list in ascending order
+    // Add Head
+    if (temp == NULL || compareRDVDates(temp, newRdv) > 0) {
+        newRdv->next = contact->rdv_head;
+        contact->rdv_head = newRdv;
+    } else { // Add to middle or end of the list
+        temp = contact->rdv_head;
+        while (temp->next != NULL && compareRDVDates(temp, newRdv) < 0) {
+            temp = temp->next;
+        }
+        newRdv->next = temp->next;
+        temp->next = newRdv;
+    }
+}
 
-    rdv->horaire.heure = intTime[0];
-    rdv->horaire.minute = intTime[1];
-
-    rdv->duree.heure = intDuration[0];
-    rdv->duree.minute = intDuration[1];
-
-
-    // Rajout dans la liste par ordre croissant
-    if (temp == NULL) {
-        contact->rdv_head = rdv;
+void delete_RDV(t_d_contact *contact, int RDVnumber) {
+    t_d_rdv *temp;
+    temp = contact->rdv_head;
+    if (RDVnumber == 0) {
+        contact->rdv_head = contact->rdv_head->next;
+        free(temp);
+        temp = NULL;
         return;
     }
-    if (rdv->date.annee < temp->date.annee ||
-        temp->date.annee == rdv->date.annee && rdv->date.annee < temp->date.annee ||
-        temp->date.annee == rdv->date.annee && rdv->date.annee == temp->date.annee &&
-        rdv->date.jour < temp->date.jour) {
-        rdv->next = temp;
-        contact->rdv_head = rdv;
+
+    for (int i = 1; i < RDVnumber; i++) {
+        if (temp->next != NULL) {
+            temp = temp->next;
+        } else {
+            printf("Appointment not found\n");
+            return;
+        }
+    }
+    if (temp->next == NULL || temp->next->next == NULL) {
+        printf("Appointment not found\n");
         return;
     }
-    prev = temp;
-    temp = temp->next;
-    while (temp != NULL) {
 
-        // Equal date
-        if ((temp->date.annee == rdv->date.annee) && (temp->date.mois == rdv->date.mois) &&
-            (temp->date.jour == rdv->date.jour)) {
-            if (rdv->horaire.heure < temp->horaire.heure) {
-                temp = rdv;
-                temp->next = contact->rdv_head;
-                contact->rdv_head = temp;
-                temp = NULL;
-                break;
-            } else {
-                if (rdv->horaire.heure == temp->horaire.heure && rdv->horaire.minute < temp->horaire.minute) {
-                    temp = rdv;
-                    temp->next = contact->rdv_head;
-                    contact->rdv_head = temp;
-                    temp = NULL;
-                    break;
-                } else {
-                    rdv->next = temp->next;
-                    temp->next = rdv;
-                    break;
-                }
-            }
-        }
-        if (rdv->date.annee < temp->date.annee) {
-            break;
-        }
-        if (temp->date.annee == rdv->date.annee) {    //for month
-            if (rdv->date.mois < temp->date.mois) {
-                break;
-            }
+    t_d_rdv *toDelete = temp->next;
+    temp->next = temp->next->next;
+    free(toDelete);
+    toDelete = NULL;
+}
 
-            if (temp->date.mois == rdv->date.mois) {           //for day
-                if (rdv->date.jour < temp->date.jour) {
-                    break;
-                }
-            }
-        }
-        prev = temp;
-        temp = temp->next;
+
+void delete_all_RDV(t_d_contact *contact) {
+    t_d_rdv *temp;
+    while (contact->rdv_head != NULL) {
+        temp = contact->rdv_head;
+        contact->rdv_head = contact->rdv_head->next;
+        free(temp);
     }
-    prev->next = rdv;
-    rdv->next = temp;
 }
 
 void display_Rendez_Vous(t_d_rdv rdv) {
@@ -495,7 +482,6 @@ void display_Rendez_Vous(t_d_rdv rdv) {
     if (rdv.duree.heure == 0) printf("\t\tDuration : %02d minutes\n\n", rdv.duree.minute);
     else printf("\t\tDuration : %02d hours and %02d minutes\n\n", rdv.duree.heure, rdv.duree.minute);
 }
-
 
 void display_all_rendez_vous(t_d_ContactList contactList, char *rdvContactName) {
     t_d_contact **isContact = isContactInList(contactList, rdvContactName);
@@ -509,7 +495,7 @@ void display_all_rendez_vous(t_d_ContactList contactList, char *rdvContactName) 
     printf("%s's appointments :\n", contact->nom);
     int i = 0;
     while (rdv_cur != NULL) {
-        printf("Appointment n°%d\n", i++);
+        printf("Appointment %d\n", i++);
         display_Rendez_Vous(*rdv_cur);
         rdv_cur = rdv_cur->next;
     }

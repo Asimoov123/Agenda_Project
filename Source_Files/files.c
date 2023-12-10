@@ -55,7 +55,6 @@ void loadFromFile(t_d_ContactList* contactList, char* filePath) {
 
         if (!isContactInList(*contactList, name)){
             printf("[+] %s\n", name);
-
         }
         temp = insertContact(contactList, name);
 
@@ -70,6 +69,7 @@ void loadFromFile(t_d_ContactList* contactList, char* filePath) {
                 strToken = strtok(NULL, ";");
                 durationStr = strdup(strToken);
                 strToken = strtok(NULL, ";");
+
                 if (strcmp(strToken, "}") == 0) {
                     load_Rendez_Vous(temp, object, dateStr, timeStr, durationStr);
                     printf("[+] Appointment successfully added\n");
@@ -80,7 +80,9 @@ void loadFromFile(t_d_ContactList* contactList, char* filePath) {
             }
             strToken = strtok(NULL, ";");
         }
+        temp = NULL;
     }
+    fclose(fpt);
 }
 
 // Function to insert contacts from a csv file

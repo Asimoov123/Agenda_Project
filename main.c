@@ -68,11 +68,11 @@ int main() {
 
 
 
-    insertFromFile(mylist, "CSV_Files/names1000_1.csv");
-    insertFromFile(mylist, "CSV_Files/names1000_2.csv");
-    insertFromFile(mylist, "CSV_Files/names1000_3.csv");
-    insertFromFile(mylist, "CSV_Files/names1000_4.csv");
-    insertFromFile(mylist, "CSV_Files/names1000_5.csv");
+//    insertFromFile(mylist, "CSV_Files/names1000_1.csv");
+//    insertFromFile(mylist, "CSV_Files/names1000_2.csv");
+//    insertFromFile(mylist, "CSV_Files/names1000_3.csv");
+//    insertFromFile(mylist, "CSV_Files/names1000_4.csv");
+//    insertFromFile(mylist, "CSV_Files/names1000_5.csv");
 
 
     while (run) {
